@@ -1,0 +1,19 @@
+# =========================
+# Simulation Library
+# =========================
+
+add_library(fluid_simulation
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/saturation_arithmetic.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/simulation.c
+)
+
+
+target_include_directories(fluid_simulation_gui
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sim
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)

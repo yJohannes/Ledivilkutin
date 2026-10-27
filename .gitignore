@@ -1,0 +1,8 @@
+# Folders
+archive/private
+docs/private
+**/__pycache__/
+**/build/
+
+# Files
+*.exe

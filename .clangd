@@ -1,0 +1,34 @@
+CompileFlags:
+  CompilationDatabase: build
+
+  Add:
+    - -std=c++23
+    - -Iinclude
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - cppcoreguidelines-*
+      - modernize-*
+      - performance-*
+      - readability-*
+    Remove:
+      - bugprone-easily-swappable-parameters
+      - cppcoreguidelines-avoid-c-arrays
+      - cppcoreguidelines-avoid-magic-numbers
+      - cppcoreguidelines-macro-usage
+      - cppcoreguidelines-pro-bounds-constant-array-index
+      - cppcoreguidelines-pro-bounds-pointer-arithmetic
+      - cppcoreguidelines-pro-type-vararg
+      - modernize-use-trailing-return-type
+      - readability-identifier-length
+      - readability-avoid-nested-conditional-operator
+      - readability-braces-around-statements
+      - readability-enum-initial-value
+      - readability-math-missing-parentheses
+      - readability-implicit-bool-conversion
+      - readability-uppercase-literal-suffix
+
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
