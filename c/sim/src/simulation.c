@@ -19,6 +19,23 @@ vec2u16 cum_com;
 uint8_t frame_counter;
 
 
+void initialize_positions(void)
+{
+    for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; i++)
+    {
+        int8_t x = (i % 9) - 4;
+        int8_t y = (i / 9) - 4;
+
+        p[i] = (vec2u){
+            SIM_CENTER_X + x,
+            SIM_CENTER_Y + y
+        };
+
+        pp[i] = p[i];
+    }
+}
+
+
 void simulate_frame(void)
 {
     ++frame_counter;
