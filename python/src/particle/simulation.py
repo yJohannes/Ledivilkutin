@@ -66,11 +66,9 @@ class Simulation:
             # Reject movement that would cross a boundary.
             if nx < 0 or nx > 255:
                 nx = x
-                pp[i].x = x
 
             if ny < 0 or ny > 255:
                 ny = y
-                pp[i].y = y
 
             # Commit the updated position.
             p[i].x = nx

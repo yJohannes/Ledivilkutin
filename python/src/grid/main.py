@@ -654,7 +654,7 @@ def main():
     pygame.init()
 
     screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
-    pygame.display.set_caption("16x16 Fluid Simulation")
+    pygame.display.set_caption("Ledivilkutin | Fluid Simulation")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 18)
