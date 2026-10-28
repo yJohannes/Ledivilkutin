@@ -1,7 +1,7 @@
 
 @echo off
 if "%~1"=="gui" (
-    build\sim\c\gui\fluid_simulation_gui.exe
+    build\c\gui\fluid_simulation_gui.exe
 ) else if "%~1"=="a" (
     echo a
 ) else (
