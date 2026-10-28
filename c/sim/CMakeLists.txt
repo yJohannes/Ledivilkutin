@@ -5,7 +5,7 @@
 add_library(fluid_simulation
     ${CMAKE_CURRENT_SOURCE_DIR}/src/simulation.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/saturation_arithmetic.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/int_arithmetic.c
 )
 
 
