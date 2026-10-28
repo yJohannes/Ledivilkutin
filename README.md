@@ -3,8 +3,18 @@ Hi
 
 ## Logs
 
+29/10/2026
+- Finished porting the simulation.
+- Achieved excellent stability and efficiency by using `__builtin_add_overflow` to not perform addition if overflow occurs.
+
+28/10/2026
+- Began working on a GUI using Dear ImGui to tweak parameters during runtime.
+
+27/10/2026
+- Simulation code almost fully ported.
+
 26/10/2026
-- Began rewriting the simulation in C.
+- Began porting the simulation to C.
 
 25/10/2026
 - Awesome new ideas and improvements to the fluid simulation.
@@ -38,7 +48,7 @@ Hi
 - Soldered 60 LEDs
 
 1/10/2026 - 13/10/2026
-- Worked on a grid based fluid simulation using CA Margolus algorithm. 
+- Worked on a grid based fluid simulation using CA Margolus algorithm.
 
 30/9/2026
 - Soldered MCU, LEDs, resistors and capacitor.
