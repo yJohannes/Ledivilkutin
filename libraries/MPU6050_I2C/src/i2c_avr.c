@@ -55,8 +55,7 @@ static void i2c_delay_us(uint8_t n)
 {
     while (n--)
     {
-        // Expects compile time constant
-        _delay_us(1);
+        _delay_us(1); // Expects compile time constant
     }
 }
 

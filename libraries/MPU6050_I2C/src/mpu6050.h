@@ -26,6 +26,8 @@ bool mpu6050_set_sleep(bool sleep);
 bool mpu6050_set_dlpf(uint8_t level); // Not implemented
 bool mpu6050_read_accel(int16_t* ax, int16_t* ay, int16_t* az);
 bool mpu6050_read_accel_i8(int8_t *ax, int8_t *ay, int8_t *az);
+bool mpu6050_read_accel_xy(int16_t* ax, int16_t* ay);
+bool mpu6050_read_accel_xy_i8(int8_t *ax, int8_t *ay);
 
 #ifdef __cplusplus
 }

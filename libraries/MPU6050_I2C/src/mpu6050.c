@@ -127,7 +127,7 @@ bool mpu6050_read_accel(int16_t* ax, int16_t* ay, int16_t* az)
         MPU6050_ADDR,
         MPU6050_REG_ACCEL_XOUT_H,
         raw,
-        6
+        sizeof(raw)
     ))
         return false;
 
@@ -149,7 +149,7 @@ bool mpu6050_read_accel_i8(int8_t *ax, int8_t *ay, int8_t *az)
             MPU6050_ADDR,
             MPU6050_REG_ACCEL_XOUT_H,
             raw,
-            sizeof raw))
+            sizeof(raw)))
     {
         return false;
     }
@@ -158,6 +158,51 @@ bool mpu6050_read_accel_i8(int8_t *ax, int8_t *ay, int8_t *az)
     *ax = (int8_t)raw[0];
     *ay = (int8_t)raw[2];
     *az = (int8_t)raw[4];
+
+    return true;
+}
+
+
+bool mpu6050_read_accel_xy(int16_t* ax, int16_t* ay)
+{
+    if (ax == NULL || ay == NULL)
+        return false;
+
+    uint8_t raw[4];
+
+    if (!i2c_read_registers(
+        MPU6050_ADDR,
+        MPU6050_REG_ACCEL_XOUT_H,
+        raw,
+        sizeof(raw)
+    ))
+        return false;
+
+    *ax = (int16_t)(((uint16_t)raw[0] << 8) | raw[1]);
+    *ay = (int16_t)(((uint16_t)raw[2] << 8) | raw[3]);
+
+    return true;
+}
+
+bool mpu6050_read_accel_xy_i8(int8_t *ax, int8_t *ay)
+{
+    if (ax == NULL || ay == NULL)
+        return false;
+
+    uint8_t raw[4];
+
+    if (!i2c_read_registers(
+            MPU6050_ADDR,
+            MPU6050_REG_ACCEL_XOUT_H,
+            raw,
+            sizeof(raw)))
+    {
+        return false;
+    }
+
+    // Extract high bytes directly
+    *ax = (int8_t)raw[0];
+    *ay = (int8_t)raw[2];
 
     return true;
 }
