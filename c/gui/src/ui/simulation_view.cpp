@@ -140,7 +140,7 @@ namespace ledv::gui
             }
 
             // Draw particles.
-            if (gui_cfg.draw_particles)
+            if (gui_cfg.render_particles)
             {
                 const float particle_radius = cell_size / 6.0f;
 
