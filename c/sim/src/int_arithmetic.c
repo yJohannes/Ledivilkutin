@@ -1,4 +1,4 @@
-#include "saturation_arithmetic.h"
+#include "int_arithmetic.h"
 
 #include <stdint.h>
 #include <limits.h>
@@ -18,6 +18,7 @@ uint8_t sat_add_u8_s8(uint8_t x, int8_t y)
     return result;
 }
 
+
 int8_t sat_add_s8(int8_t x, int8_t y)
 {
     int8_t result;
@@ -28,12 +29,3 @@ int8_t sat_add_s8(int8_t x, int8_t y)
     return result;
 }
 
-int8_t sat_skip_add_s8(int8_t x, int8_t y)
-{
-    int8_t result;
-
-    if (__builtin_add_overflow(x, y, &result))
-        return x;
-
-    return result;
-}
