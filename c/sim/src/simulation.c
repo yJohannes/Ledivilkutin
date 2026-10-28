@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "saturation_arithmetic.h"
+#include "int_arithmetic.h"
 #include "vec2.h"
 
 #if SIM_USE_EUCLIDEAN_SEPARATION
@@ -50,6 +50,7 @@ void simulate_frame(void)
         ay = a.y;
     }
 
+#if SIM_INTEGRATION_ENABLED
     // Integrate positions using Verlet integration
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -75,15 +76,15 @@ void simulate_frame(void)
         pp[i].y = p[i].y;
 
         // new_x = x + dx + a
-        // trust that dx + a.x won't over/underflow :)
-        // clamp nx to [0, 255]
-        p[i].x = sat_add_u8_s8(p[i].x, dx + ax);
-        p[i].y = sat_add_u8_s8(p[i].y, dy + ay);
-
-        // uint8_t nx = sat_add_u8_s8(p[i].x, dx + a.x);
-        // uint8_t ny = sat_add_u8_s8(p[i].y, dy + a.y);
+        // Use try_add because it prevents weird border behaviour
+        // Trust that dx + a.x won't over/underflow :] (it shouldn't)
+        p[i].x = try_add_u8_s8(p[i].x, dx + ax);
+        p[i].y = try_add_u8_s8(p[i].y, dy + ay);
     }
+#endif // SIM_INTEGRATION_ENABLED
 
+
+#if SIM_COLLISIONS_ENABLED
     // Handle overlaps
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -94,7 +95,7 @@ void simulate_frame(void)
             int16_t dx = p[j].x - p[i].x;
             int16_t dy = p[j].y - p[i].y;
 
-#if SIM_USE_EUCLIDEAN_SEPARATION
+    #if SIM_USE_EUCLIDEAN_SEPARATION
 
             int32_t distance_sq = (int32_t)dx * dx + (int32_t)dy * dy;
 
@@ -119,13 +120,13 @@ void simulate_frame(void)
             int16_t correction_y = (int16_t)((int32_t)dy * overlap / (2 * distance));
 
             // Apply equal and opposite corrections to both particles.
-            p[i].x = sat_add_u8_s8(p[i].x, (int8_t)-correction_x);
-            p[i].y = sat_add_u8_s8(p[i].y, (int8_t)-correction_y);
+            p[i].x = try_add_u8_s8(p[i].x, (int8_t)-correction_x);
+            p[i].y = try_add_u8_s8(p[i].y, (int8_t)-correction_y);
 
-            p[j].x = sat_add_u8_s8(p[j].x, (int8_t)correction_x);
-            p[j].y = sat_add_u8_s8(p[j].y, (int8_t)correction_y);
+            p[j].x = try_add_u8_s8(p[j].x, (int8_t)correction_x);
+            p[j].y = try_add_u8_s8(p[j].y, (int8_t)correction_y);
 
-#else // Use axis-aligned separation
+    #else // Use axis-aligned separation
 
             uint8_t ax = dx > 0 ? dx : -dx;
             uint8_t ay = dy > 0 ? dy : -dy;
@@ -149,8 +150,9 @@ void simulate_frame(void)
                 correction_i = dx > 0 ? -correction_i : correction_i;
                 correction_j = dx >= 0 ? correction_j : -correction_j;
 
-                p[i].x = sat_add_u8_s8(p[i].x, correction_i);
-                p[j].x = sat_add_u8_s8(p[j].x, correction_j);
+                // Use try_add because it prevents weird border behaviour
+                p[i].x = try_add_u8_s8(p[i].x, correction_i);
+                p[j].x = try_add_u8_s8(p[j].x, correction_j);
             }
             else
             {
@@ -162,14 +164,18 @@ void simulate_frame(void)
                 correction_i = dy > 0 ? -correction_i : correction_i;
                 correction_j = dy >= 0 ? correction_j : -correction_j;
 
-                p[i].y = sat_add_u8_s8(p[i].y, correction_i);
-                p[j].y = sat_add_u8_s8(p[j].y, correction_j);
+                // Use try_add because it prevents weird border behaviour
+                p[i].y = try_add_u8_s8(p[i].y, correction_i);
+                p[j].y = try_add_u8_s8(p[j].y, correction_j);
             }
 
-#endif // SIM_USE_EUCLIDEAN_SEPARATION
+    #endif // SIM_USE_EUCLIDEAN_SEPARATION
         }
     }
+#endif // SIM_COLLISIONS_ENABLED
 
+
+#if SIM_COM_ENABLED
     // Calculate COM
     if (frame_counter % SIM_CENTER_OF_MASS_INTERVAL == SIM_CENTER_OF_MASS_REMAINDER)
     {
@@ -199,7 +205,10 @@ void simulate_frame(void)
                 --p[i].y;
         }
     }
+#endif // SIM_COM_ENABLED
 
+
+#if SIM_FRICTION_ENABLED
     // Apply friction (experimental)
     if (frame_counter % SIM_FRICTION_INTERVAL == SIM_FRICTION_REMAINDER)
     {
@@ -217,4 +226,5 @@ void simulate_frame(void)
                 --pp[i].y;
         }
     }
+#endif // SIM_FRICTION_ENABLED
 }
