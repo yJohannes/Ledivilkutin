@@ -5,6 +5,7 @@
 #include <cassert>
 #include <chrono>
 
+#include <format>
 #include <imgui.h>
 
 #include <iostream>
@@ -21,6 +22,7 @@ namespace ledv::gui
     Application::Application(Window& window)
         : window_(window)
     {
+        initialize_positions();
     }
 
     int Application::Run()
@@ -46,11 +48,17 @@ namespace ledv::gui
                     int16_t ay;
                     serial_controller_.ReadAcceleration(ax, ay);
 
-                    std::cout << ax << ',' << ay << '\n';
+                    // Scale to int8 and additionally scale to fit
+                    // Flip x-coordinates for easier handling of the
+                    // physical Arduino board.
+                    // Could possibly just bitshift for 2's complement?
+                    a.x = (int8_t)(-ax / 256) >> 2; // divide by 4 => [-32, 31]
+                    a.y = (int8_t)(ay / 256) >> 2;
 
-                    // scale to int8 and additionally scale to fit 
-                    a.x = (int8_t)(ax / 256);
-                    a.y = (int8_t)(ay / 256);
+                    std::cout << std::format("a_raw:    [{:>6},{:>6}]", ax, ay)
+                              << '\n'
+                              << std::format("a_scaled: [{:>6},{:>6}]", a.x, a.y)
+                              << '\n';
 
                     simulate_frame();
                     gui_cfg.next_frame_requested = false;
