@@ -49,6 +49,10 @@ namespace ledv::gui
         ImGui::SeparatorText("Particles");
 
         {
+            ImGui::Checkbox("Render Particles", &gui_cfg.render_particles);
+        }
+
+        {
             uint8_t min = 1;
             uint8_t max = 127;
 
@@ -62,7 +66,7 @@ namespace ledv::gui
         }
 
         {
-            uint8_t min = 0;
+            uint8_t min = 3;
             uint8_t max = 127;
 
             ImGui::SliderScalar(
@@ -92,7 +96,7 @@ namespace ledv::gui
 
         {
             uint8_t min = 1;
-            uint8_t max = 60;
+            uint8_t max = 10;
 
             ImGui::SliderScalar(
                 "Interval##Acceleration",
@@ -121,7 +125,7 @@ namespace ledv::gui
 
         {
             uint8_t min = 1;
-            uint8_t max = 60;
+            uint8_t max = 10;
 
             ImGui::SliderScalar(
                 "Interval##CenterOfMass",
@@ -150,7 +154,7 @@ namespace ledv::gui
 
         {
             uint8_t min = 1;
-            uint8_t max = 60;
+            uint8_t max = 10;
 
             ImGui::SliderScalar(
                 "Interval##Friction",

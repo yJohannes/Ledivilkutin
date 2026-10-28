@@ -21,7 +21,8 @@
 
 #define SIM_WIDTH   UINT8_VALUE_COUNT
 #define SIM_HEIGHT  UINT8_VALUE_COUNT
-
+#define SIM_CENTER_X    128
+#define SIM_CENTER_Y    128
 #define SIM_CELL_WIDTH      16u  // SIM_WIDTH / LEDS_X
 #define SIM_CELL_HEIGHT     16u  // SIM_HEIGHT / LEDS_Y
 
@@ -43,6 +44,10 @@
 #define SIM_DEFAULT_FRICTION_INTERVAL           6u
 #define SIM_DEFAULT_FRICTION_REMAINDER          5u
 
+#define SIM_INTEGRATION_ENABLED true
+#define SIM_COLLISIONS_ENABLED  true
+#define SIM_COM_ENABLED         true
+#define SIM_FRICTION_ENABLED    true
 
 #define SIM_USE_DYNAMIC
 #ifndef SIM_USE_DYNAMIC

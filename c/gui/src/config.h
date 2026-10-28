@@ -30,7 +30,7 @@ struct GuiConfig
 
     bool simulation_paused = false;
     bool next_frame_requested = false;
-    bool draw_particles = true;
+    bool render_particles = true;
 
     ImU32 GetColor(float intensity = 1.0f) const
     {
