@@ -1,11 +1,13 @@
 #include "application.h"
 
+#include <cstdint>
 #include <cstdlib>
 #include <cassert>
 #include <chrono>
 
 #include <imgui.h>
 
+#include <iostream>
 #include <sim/simulation.h>
 #include <sim/config.h>
 
@@ -40,6 +42,16 @@ namespace ledv::gui
             {
                 if (!gui_cfg.simulation_paused || gui_cfg.next_frame_requested)
                 {
+                    int16_t ax;
+                    int16_t ay;
+                    serial_controller_.ReadAcceleration(ax, ay);
+
+                    std::cout << ax << ',' << ay << '\n';
+
+                    // scale to int8 and additionally scale to fit 
+                    a.x = (int8_t)(ax / 256);
+                    a.y = (int8_t)(ay / 256);
+
                     simulate_frame();
                     gui_cfg.next_frame_requested = false;
                 }

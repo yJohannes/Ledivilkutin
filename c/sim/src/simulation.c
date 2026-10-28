@@ -6,7 +6,10 @@
 #include "config.h"
 #include "saturation_arithmetic.h"
 #include "vec2.h"
+
+#if SIM_USE_EUCLIDEAN_SEPARATION
 #include "utils.h"
+#endif
 
 
 vec2u p[SIM_PARTICLE_COUNT];

@@ -76,6 +76,7 @@ add_executable(fluid_simulation_gui
     ${CMAKE_CURRENT_SOURCE_DIR}/src/app/application.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/simulation_view.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/config_view.cpp
+    src/serial_controller.cpp
 )
 
 target_include_directories(fluid_simulation_gui
