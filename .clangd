@@ -2,7 +2,6 @@ CompileFlags:
   CompilationDatabase: build
 
   Add:
-    - -std=c++23
     - -Iinclude
 
 Diagnostics:
@@ -17,6 +16,7 @@ Diagnostics:
       - bugprone-easily-swappable-parameters
       - cppcoreguidelines-avoid-c-arrays
       - cppcoreguidelines-avoid-magic-numbers
+      - cppcoreguidelines-init-variables
       - cppcoreguidelines-macro-usage
       - cppcoreguidelines-pro-bounds-constant-array-index
       - cppcoreguidelines-pro-bounds-pointer-arithmetic

@@ -3,6 +3,8 @@ archive/private
 docs/private
 **/__pycache__/
 **/build/
+.cache
 
 # Files
 *.exe
+imgui.ini

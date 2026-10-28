@@ -11,6 +11,9 @@ p, pp = create_particles()
 sim = Simulation(p, pp)
 controller = SerialController()
 
+# Timer to let the start animation play
+start_time = pygame.time.get_ticks()
+acceleration_delay = 5000
 
 def handle_events():
 
@@ -43,8 +46,12 @@ def main():
 
         acceleration = controller.read_acceleration()
 
-        if acceleration is not None:
+        elapsed = pygame.time.get_ticks() - start_time
+
+        if elapsed >= acceleration_delay and acceleration is not None:
             sim.set_acceleration(acceleration)
+        # if acceleration is not None:
+            # sim.set_acceleration(acceleration)
 
         sim.simulate_frame()
 

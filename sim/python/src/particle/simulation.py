@@ -86,13 +86,7 @@ class Simulation:
                 # if i == j:
                     # continue
 
-                pj = p[j]
-
-                r_x = pj.x - pi.x
-                r_y = pj.y - pi.y
-
-                if SIM_PARTICLE_RADIUS_SQ >= r_x * r_x + r_y * r_y:
-                    self.separate_pair(i, j)
+                self.separate_pair(i, j)
 
         # Calculate COM
         if self.frame_counter % 5 == 2:

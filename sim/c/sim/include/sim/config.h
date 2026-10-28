@@ -72,18 +72,17 @@ extern "C" {
 
 typedef struct
 {
-    uint8_t SIM_FPS;
+    uint8_t fps;
     // uint8_t SIM_PARTICLE_COUNT;
-    uint8_t SIM_PARTICLE_RADIUS;
-    uint8_t SIM_PARTICLE_MIN_DISTANCE;
-    uint8_t SIM_PARTICLE_MAX_DISPLACEMENT;
-    uint8_t SIM_ACCELERATION_INTERVAL;
-    uint8_t SIM_ACCELERATION_REMAINDER;
-    uint8_t SIM_CENTER_OF_MASS_INTERVAL;
-    uint8_t SIM_CENTER_OF_MASS_REMAINDER;
-    uint8_t SIM_FRICTION_INTERVAL;
-    uint8_t SIM_FRICTION_REMAINDER;
-
+    uint8_t particle_radius;
+    uint8_t particle_min_distance;
+    uint8_t particle_max_displacement;
+    uint8_t acceleration_interval;
+    uint8_t acceleration_remainder;
+    uint8_t center_of_mass_interval;
+    uint8_t center_of_mass_remainder;
+    uint8_t friction_interval;
+    uint8_t friction_remainder;
 } sim_config;
 
 
@@ -94,20 +93,20 @@ extern sim_config cfg;
 }
 #endif
 
-#define SIM_FPS                         cfg.SIM_FPS
+#define SIM_FPS                         cfg.fps
 #define SIM_PARTICLE_COUNT              75u
 // #define SIM_PARTICLE_COUNT              cfg.SIM_PARTICLE_COUNT
-#define SIM_PARTICLE_RADIUS             cfg.SIM_PARTICLE_RADIUS
+#define SIM_PARTICLE_RADIUS             cfg.particle_radius
 #define SIM_PARTICLE_RADIUS_SQ          (SIM_PARTICLE_RADIUS * SIM_PARTICLE_RADIUS)
-#define SIM_PARTICLE_MIN_DISTANCE       cfg.SIM_PARTICLE_MIN_DISTANCE
+#define SIM_PARTICLE_MIN_DISTANCE       cfg.particle_min_distance
 #define SIM_PARTICLE_MIN_DISTANCE_SQ    (SIM_PARTICLE_MIN_DISTANCE * SIM_PARTICLE_MIN_DISTANCE)
-#define SIM_PARTICLE_MAX_DISPLACEMENT   cfg.SIM_PARTICLE_MAX_DISPLACEMENT
-#define SIM_ACCELERATION_INTERVAL       cfg.SIM_ACCELERATION_INTERVAL
-#define SIM_ACCELERATION_REMAINDER      cfg.SIM_ACCELERATION_REMAINDER
-#define SIM_CENTER_OF_MASS_INTERVAL     cfg.SIM_CENTER_OF_MASS_INTERVAL
-#define SIM_CENTER_OF_MASS_REMAINDER    cfg.SIM_CENTER_OF_MASS_REMAINDER
-#define SIM_FRICTION_INTERVAL           cfg.SIM_FRICTION_INTERVAL
-#define SIM_FRICTION_REMAINDER          cfg.SIM_FRICTION_REMAINDER
+#define SIM_PARTICLE_MAX_DISPLACEMENT   cfg.particle_max_displacement
+#define SIM_ACCELERATION_INTERVAL       cfg.acceleration_interval
+#define SIM_ACCELERATION_REMAINDER      cfg.acceleration_remainder
+#define SIM_CENTER_OF_MASS_INTERVAL     cfg.center_of_mass_interval
+#define SIM_CENTER_OF_MASS_REMAINDER    cfg.center_of_mass_remainder
+#define SIM_FRICTION_INTERVAL           cfg.friction_interval
+#define SIM_FRICTION_REMAINDER          cfg.friction_remainder
 
 #endif
 

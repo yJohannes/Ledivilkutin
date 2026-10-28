@@ -12,9 +12,8 @@
 vec2u p[SIM_PARTICLE_COUNT];
 vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
-
+vec2u16 cum_com;
 uint8_t frame_counter;
-vec2u16 cum_com;        // Cumulative center of mass
 
 
 void simulate_frame(void)
@@ -38,7 +37,7 @@ void simulate_frame(void)
         // For 2's complement the underflow + cast gives the
         // correct result :)
         int8_t dx = p[i].x - pp[i].x;
-        int8_t dy = p[i].y - pp[i].x;
+        int8_t dy = p[i].y - pp[i].y;
 
         // Clamp dx
         if (dx > SIM_PARTICLE_MAX_DISPLACEMENT)
@@ -58,8 +57,8 @@ void simulate_frame(void)
         // new_x = x + dx + a
         // trust that dx + a.x won't over/underflow :)
         // clamp nx to [0, 255]
-        p[i].x = sat_add_u8_s8(p[i].x, dx + a.x);
-        p[i].y = sat_add_u8_s8(p[i].y, dy + a.y);
+        p[i].x = sat_add_u8_s8(p[i].x, dx + ax);
+        p[i].y = sat_add_u8_s8(p[i].y, dy + ay);
 
         // uint8_t nx = sat_add_u8_s8(p[i].x, dx + a.x);
         // uint8_t ny = sat_add_u8_s8(p[i].y, dy + a.y);
@@ -117,14 +116,18 @@ void simulate_frame(void)
                 continue;
 
             uint8_t overlap;
-            int8_t correction_i, correction_j;
+            int8_t correction_i;
+            int8_t correction_j;
+
             if (ax >= ay)
             {
                 overlap = SIM_PARTICLE_MIN_DISTANCE - ax;
-                correction_i = (int8_t)(overlap >> 1); // Half of overlap
+
+                correction_i = overlap >> 1; // Half of the overlap
+                correction_j = overlap - correction_i;
 
                 correction_i = dx > 0 ? -correction_i : correction_i;
-                correction_j = overlap - -correction_i;
+                correction_j = dx >= 0 ? correction_j : -correction_j;
 
                 p[i].x = sat_add_u8_s8(p[i].x, correction_i);
                 p[j].x = sat_add_u8_s8(p[j].x, correction_j);
@@ -132,10 +135,12 @@ void simulate_frame(void)
             else
             {
                 overlap = SIM_PARTICLE_MIN_DISTANCE - ay;
-                correction_i = (int8_t)(overlap >> 1); // Half of overlap
+
+                correction_i = overlap >> 1;
+                correction_j = overlap - correction_i;
 
                 correction_i = dy > 0 ? -correction_i : correction_i;
-                correction_j = overlap - -correction_i;
+                correction_j = dy >= 0 ? correction_j : -correction_j;
 
                 p[i].y = sat_add_u8_s8(p[i].y, correction_i);
                 p[j].y = sat_add_u8_s8(p[j].y, correction_j);
