@@ -1,5 +1,10 @@
 include(FetchContent)
 
+
+add_compile_definitions(
+    GUI_ASSETS_DIR="${CMAKE_BINARY_DIR}/assets"
+)
+
 # =========================
 # OpenGL, GLFW & Dear ImGui library
 # =========================
@@ -65,12 +70,19 @@ target_link_libraries(imgui
 
 add_executable(fluid_simulation_gui
     ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/src/gl.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/app/application.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/simulation_view.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/config_view.cpp
 )
 
 target_include_directories(fluid_simulation_gui
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(fluid_simulation_gui
@@ -78,5 +90,10 @@ target_link_libraries(fluid_simulation_gui
         fluid_simulation
         glfw
         imgui
-        opengl32z
+        opengl32
+)
+
+
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+    DESTINATION "${CMAKE_BINARY_DIR}"
 )

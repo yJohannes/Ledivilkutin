@@ -1,7 +1,7 @@
 #include <cstdlib>
 
-#include "window.h"
-#include "application.h"
+#include "platform/window.h"
+#include "app/application.h"
 
 
 int main()
