@@ -95,38 +95,7 @@ void simulate_frame(void)
             int16_t dx = p[j].x - p[i].x;
             int16_t dy = p[j].y - p[i].y;
 
-    #if SIM_USE_EUCLIDEAN_SEPARATION
-
-            int32_t distance_sq = (int32_t)dx * dx + (int32_t)dy * dy;
-
-            if (distance_sq >= SIM_PARTICLE_MIN_DISTANCE_SQ)
-                continue;
-
-            // Calculate the Euclidean distance.
-            uint16_t distance = isqrt_u32((uint32_t)distance_sq);
-
-            // Avoid division by zero when particles occupy the same position.
-            if (distance == 0)
-            {
-                dx = 1;
-                dy = 0;
-                distance = 1;
-            }
-
-            // Calculate the overlap along the normalized direction vector.
-            uint16_t overlap = SIM_PARTICLE_MIN_DISTANCE - distance;
-
-            int16_t correction_x = (int16_t)((int32_t)dx * overlap / (2 * distance));
-            int16_t correction_y = (int16_t)((int32_t)dy * overlap / (2 * distance));
-
-            // Apply equal and opposite corrections to both particles.
-            p[i].x = try_add_u8_s8(p[i].x, (int8_t)-correction_x);
-            p[i].y = try_add_u8_s8(p[i].y, (int8_t)-correction_y);
-
-            p[j].x = try_add_u8_s8(p[j].x, (int8_t)correction_x);
-            p[j].y = try_add_u8_s8(p[j].y, (int8_t)correction_y);
-
-    #else // Use axis-aligned separation
+            // Do axis-aligned separation
 
             uint8_t ax = dx > 0 ? dx : -dx;
             uint8_t ay = dy > 0 ? dy : -dy;
@@ -168,8 +137,6 @@ void simulate_frame(void)
                 p[i].y = try_add_u8_s8(p[i].y, correction_i);
                 p[j].y = try_add_u8_s8(p[j].y, correction_j);
             }
-
-    #endif // SIM_USE_EUCLIDEAN_SEPARATION
         }
     }
 #endif // SIM_COLLISIONS_ENABLED
