@@ -8,3 +8,4 @@ docs/private
 # Files
 *.exe
 imgui.ini
+window.ini
