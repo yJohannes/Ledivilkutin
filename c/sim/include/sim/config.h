@@ -26,17 +26,15 @@
 #define SIM_CELL_WIDTH      16u  // SIM_WIDTH / LEDS_X
 #define SIM_CELL_HEIGHT     16u  // SIM_HEIGHT / LEDS_Y
 
-#define SIM_USE_EUCLIDEAN_SEPARATION    false   // when false use axis-aligned sep
-
+// Constant as of now
+#define SIM_DEFAULT_PARTICLE_COUNT      75u
+#define SIM_PARTICLE_COUNT              SIM_DEFAULT_PARTICLE_COUNT
 
 // Tweakable parameters
 #define SIM_DEFAULT_FPS                         20u
-#define SIM_DEFAULT_PARTICLE_COUNT              75u
 #define SIM_DEFAULT_PARTICLE_RADIUS             32u
-#define SIM_DEFAULT_PARTICLE_RADIUS_SQ          1024u
-#define SIM_DEFAULT_PARTICLE_MIN_DISTANCE       16u   // Distance before particles are pushed apart
-#define SIM_DEFAULT_PARTICLE_MIN_DISTANCE_SQ    (SIM_PARTICLE_MIN_DISTANCE * SIM_PARTICLE_MIN_DISTANCE)
-#define SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT   15u   // Maximum dx in Verlet integration
+#define SIM_DEFAULT_PARTICLE_MIN_DISTANCE       16   // Distance before particles are pushed apart
+#define SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT   15   // Maximum dx in Verlet integration
 #define SIM_DEFAULT_ACCELERATION_INTERVAL       3u
 #define SIM_DEFAULT_ACCELERATION_REMAINDER      0u
 #define SIM_DEFAULT_CENTER_OF_MASS_INTERVAL     3u
@@ -44,22 +42,12 @@
 #define SIM_DEFAULT_FRICTION_INTERVAL           6u
 #define SIM_DEFAULT_FRICTION_REMAINDER          5u
 
-#define SIM_INTEGRATION_ENABLED true
-#define SIM_COLLISIONS_ENABLED  true
-#define SIM_COM_ENABLED         true
-#define SIM_FRICTION_ENABLED    true
-
-#define SIM_USE_DYNAMIC
 #ifndef SIM_USE_DYNAMIC
-
 
 // Defaults for non-dynamic
 #define SIM_FPS                         SIM_DEFAULT_FPS
-#define SIM_PARTICLE_COUNT              SIM_DEFAULT_PARTICLE_COUNT
 #define SIM_PARTICLE_RADIUS             SIM_DEFAULT_PARTICLE_RADIUS
-#define SIM_PARTICLE_RADIUS_SQ          SIM_DEFAULT_PARTICLE_RADIUS_SQ
 #define SIM_PARTICLE_MIN_DISTANCE       SIM_DEFAULT_PARTICLE_MIN_DISTANCE
-#define SIM_PARTICLE_MIN_DISTANCE_SQ    SIM_DEFAULT_PARTICLE_MIN_DISTANCE_SQ
 #define SIM_PARTICLE_MAX_DISPLACEMENT   SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT
 #define SIM_ACCELERATION_INTERVAL       SIM_DEFAULT_ACCELERATION_INTERVAL
 #define SIM_ACCELERATION_REMAINDER      SIM_DEFAULT_ACCELERATION_REMAINDER
@@ -78,7 +66,6 @@ extern "C" {
 typedef struct
 {
     uint8_t fps;
-    // uint8_t SIM_PARTICLE_COUNT;
     uint8_t particle_radius;
     uint8_t particle_min_distance;
     uint8_t particle_max_displacement;
@@ -99,12 +86,8 @@ extern sim_config cfg;
 #endif
 
 #define SIM_FPS                         cfg.fps
-#define SIM_PARTICLE_COUNT              75u
-// #define SIM_PARTICLE_COUNT              cfg.SIM_PARTICLE_COUNT
 #define SIM_PARTICLE_RADIUS             cfg.particle_radius
-#define SIM_PARTICLE_RADIUS_SQ          (SIM_PARTICLE_RADIUS * SIM_PARTICLE_RADIUS)
 #define SIM_PARTICLE_MIN_DISTANCE       cfg.particle_min_distance
-#define SIM_PARTICLE_MIN_DISTANCE_SQ    (SIM_PARTICLE_MIN_DISTANCE * SIM_PARTICLE_MIN_DISTANCE)
 #define SIM_PARTICLE_MAX_DISPLACEMENT   cfg.particle_max_displacement
 #define SIM_ACCELERATION_INTERVAL       cfg.acceleration_interval
 #define SIM_ACCELERATION_REMAINDER      cfg.acceleration_remainder
