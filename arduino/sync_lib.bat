@@ -2,7 +2,7 @@
 setlocal
 
 REM Define project and destination paths
-set "ROOT=%~dp0"
+set "ROOT=%~dp0..\"
 set "SOURCE=%ROOT%arduino\libraries\mpu6050_i2c"
 set "SRC_CODE=%ROOT%c\mpu6050_i2c\src"
 set "DEST=%USERPROFILE%\Documents\Arduino\libraries\MPU6050_I2C"
