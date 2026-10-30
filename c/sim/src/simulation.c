@@ -7,11 +7,8 @@
 #include "int_arithmetic.h"
 #include "vec2.h"
 
-#if SIM_USE_EUCLIDEAN_SEPARATION
-#include "utils.h"
-#endif
 
-
+// Global
 vec2u p[SIM_PARTICLE_COUNT];
 vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
@@ -19,14 +16,25 @@ vec2u16 cum_com;
 uint8_t frame_counter;
 
 
+// Set timers
+static uint8_t accel_timer;
+static uint8_t com_timer;
+static uint8_t friction_timer;
+
+
 void simulation_init(void)
 {
+    accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
+    com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
+    friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
+
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; i++)
     {
         int8_t x = (i % 9) - 4;
         int8_t y = (i / 9) - 4;
 
-        p[i] = (vec2u){
+        p[i] = (vec2u)
+        {
             SIM_CENTER_X + x,
             SIM_CENTER_Y + y
         };
@@ -44,13 +52,41 @@ void simulation_step(void)
     int8_t ax = 0u;
     int8_t ay = 0u;
 
-    if (frame_counter % SIM_ACCELERATION_INTERVAL == SIM_ACCELERATION_REMAINDER)
+    if (--accel_timer == 0)
     {
+        accel_timer = SIM_ACCELERATION_INTERVAL;
+
         ax = a.x;
         ay = a.y;
     }
 
-#if SIM_INTEGRATION_ENABLED
+#ifdef SIM_INTEGRATION_ENABLED
+
+#ifdef SIM_USE_POINTER_ITERATION
+    vec2u* p_it = p;
+    vec2u* pp_it = pp;
+
+    for (uint8_t n = SIM_PARTICLE_COUNT; n; --n, ++p_it, ++pp_it)
+    {
+        uint8_t x = p_it->x;
+        uint8_t y = p_it->y;
+
+        int8_t dx = x - pp_it->x;
+        int8_t dy = y - pp_it->y;
+
+        if (dx > SIM_PARTICLE_MAX_DISPLACEMENT)       dx = SIM_PARTICLE_MAX_DISPLACEMENT;
+        else if (dx < -SIM_PARTICLE_MAX_DISPLACEMENT) dx = -SIM_PARTICLE_MAX_DISPLACEMENT;
+
+        if (dy > SIM_PARTICLE_MAX_DISPLACEMENT)       dy = SIM_PARTICLE_MAX_DISPLACEMENT;
+        else if (dy < -SIM_PARTICLE_MAX_DISPLACEMENT) dy = -SIM_PARTICLE_MAX_DISPLACEMENT;
+
+        pp_it->x = x;  // reuse locals, no reload
+        pp_it->y = y;
+
+        p_it->x = try_add_u8_s8(x, dx + ax);
+        p_it->y = try_add_u8_s8(y, dy + ay);
+    }
+#else
     // Integrate positions using Verlet integration
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -81,10 +117,60 @@ void simulation_step(void)
         p[i].x = try_add_u8_s8(p[i].x, dx + ax);
         p[i].y = try_add_u8_s8(p[i].y, dy + ay);
     }
+#endif // SIM_USE_POINTER_ITERATION
 #endif // SIM_INTEGRATION_ENABLED
 
+#ifdef SIM_COLLISIONS_ENABLED
 
-#if SIM_COLLISIONS_ENABLED
+    // for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT - 1; ++i)
+    // {
+    //     uint8_t xi = p[i].x;
+    //     uint8_t yi = p[i].y;
+    //     vec2u *pj = &p[i + 1];
+
+    //     for (uint8_t n = SIM_PARTICLE_COUNT - 1 - i; n; --n, ++pj)
+    //     {
+    //         uint8_t xj = pj->x;
+
+    //         // Exact 8-bit |dx|, no int16 widening
+    //         bool right = xj >= xi;                 // original: dx >= 0
+    //         uint8_t ax = right ? xj - xi : xi - xj;
+    //         if (ax >= SIM_PARTICLE_MIN_DISTANCE)
+    //             continue;                          // most pairs exit here
+
+    //         uint8_t yj = pj->y;
+    //         bool below = yj >= yi;                 // original: dy >= 0
+    //         uint8_t ay = below ? yj - yi : yi - yj;
+    //         if (ay >= SIM_PARTICLE_MIN_DISTANCE)
+    //             continue;
+
+    //         uint8_t overlap, ci, cj;
+
+    //         if (ax >= ay)
+    //         {
+    //             overlap = SIM_PARTICLE_MIN_DISTANCE - ax;
+    //             ci = overlap >> 1;
+    //             cj = overlap - ci;
+    //             xi    = try_add_u8_s8(xi,    right ? -(int8_t)ci : (int8_t)ci);
+    //             pj->x = try_add_u8_s8(xj,    right ? (int8_t)cj  : -(int8_t)cj);
+    //         }
+    //         else
+    //         {
+    //             overlap = SIM_PARTICLE_MIN_DISTANCE - ay;
+    //             ci = overlap >> 1;
+    //             cj = overlap - ci;
+    //             yi    = try_add_u8_s8(yi,    below ? -(int8_t)ci : (int8_t)ci);
+    //             pj->y = try_add_u8_s8(yj,    below ? (int8_t)cj  : -(int8_t)cj);
+    //         }
+    //     }
+
+    //     p[i].x = xi;
+    //     p[i].y = yi;
+    // }
+
+
+
+
     // Handle overlaps
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -92,11 +178,24 @@ void simulation_step(void)
         for (uint8_t j = i + 1; j < SIM_PARTICLE_COUNT; ++j)
         {
             // TODO: optimize here possibly
+
+            // KOKEILE TÄTÄ IDEAA:
+            // uint8_t xj = p[j].x;
+            // uint8_t yj = p[j].y;
+
+            // bool right = xj >= xi;
+            // bool below = yj >= yi;
+            // uint8_t ax = right ? xj - xi : xi - xj;
+            // uint8_t ay = below ? yj - yi : yi - yj;
+
+            // // Bitwise | avoids a second branch
+            // if ((ax >= SIM_PARTICLE_MIN_DISTANCE) | (ay >= SIM_PARTICLE_MIN_DISTANCE))
+            //     continue;
+
             int16_t dx = p[j].x - p[i].x;
             int16_t dy = p[j].y - p[i].y;
 
             // Do axis-aligned separation
-
             uint8_t ax = dx > 0 ? dx : -dx;
             uint8_t ay = dy > 0 ? dy : -dy;
 
@@ -116,7 +215,7 @@ void simulation_step(void)
                 correction_i = overlap >> 1; // Half of the overlap
                 correction_j = overlap - correction_i;
 
-                correction_i = dx > 0 ? -correction_i : correction_i;
+                correction_i = dx >= 0 ? -correction_i : correction_i;
                 correction_j = dx >= 0 ? correction_j : -correction_j;
 
                 // Use try_add because it prevents weird border behaviour
@@ -130,7 +229,7 @@ void simulation_step(void)
                 correction_i = overlap >> 1;
                 correction_j = overlap - correction_i;
 
-                correction_i = dy > 0 ? -correction_i : correction_i;
+                correction_i = dy >= 0 ? -correction_i : correction_i;
                 correction_j = dy >= 0 ? correction_j : -correction_j;
 
                 // Use try_add because it prevents weird border behaviour
@@ -142,23 +241,53 @@ void simulation_step(void)
 #endif // SIM_COLLISIONS_ENABLED
 
 
-#if SIM_COM_ENABLED
+#ifdef SIM_COM_ENABLED
+
     // Calculate COM
-    if (frame_counter % SIM_CENTER_OF_MASS_INTERVAL == SIM_CENTER_OF_MASS_REMAINDER)
+    if (--com_timer == 0)
     {
+        com_timer = SIM_CENTER_OF_MASS_INTERVAL;
+
         cum_com.x = 0u;
         cum_com.y = 0u;
 
+
+#ifdef SIM_USE_POINTER_ITERATION
+        p_it = p;
+
+        for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i, ++p_it)
+        {
+            cum_com.x += p_it->x;
+            cum_com.y += p_it->y;
+        }
+#else
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
         {
             cum_com.x += p[i].x;
             cum_com.y += p[i].y;
         }
+#endif // SIM_USE_POINTER_ITERATION
 
         uint8_t com_x = cum_com.x / SIM_PARTICLE_COUNT;
         uint8_t com_y = cum_com.y / SIM_PARTICLE_COUNT;
 
         // Move towards COM by one unit
+#ifdef SIM_USE_POINTER_ITERATION
+        p_it = p;
+
+        for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i, ++p_it)
+        {
+            if (com_x > p_it->x)
+                ++p_it->x;
+            else if (com_x < p_it->x)
+                --p_it->x;
+
+            if (com_y > p_it->y)
+                ++p_it->y;
+            else if (com_y < p_it->y)
+                --p_it->y;
+        }
+#else
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
         {
             if (com_x > p[i].x)
@@ -171,16 +300,39 @@ void simulation_step(void)
             else if (com_y < p[i].y)
                 --p[i].y;
         }
+#endif // SIM_USE_POINTER_ITERATION
     }
 #endif // SIM_COM_ENABLED
 
 
-#if SIM_FRICTION_ENABLED
+#ifdef SIM_FRICTION_ENABLED
     // Apply friction (experimental)
-    if (frame_counter % SIM_FRICTION_INTERVAL == SIM_FRICTION_REMAINDER)
+
+
+    if (--friction_timer == 0)
     {
+        friction_timer = SIM_FRICTION_INTERVAL;
+
+#ifdef SIM_USE_POINTER_ITERATION
+        p_it = p;
+        vec2u* pp_it = pp;
+#endif // SIM_USE_POINTER_ITERATION
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
         {
+#ifdef SIM_USE_POINTER_ITERATION
+            if (p_it->x > pp_it->x)
+                ++pp_it->x;
+            else if (p_it->x < pp_it->x)
+                --pp_it->x;
+
+            if (p_it->y > pp_it->y)
+                ++pp_it->y;
+            else if (p_it->y < pp_it->y)
+                --pp_it->y;
+
+            ++p_it;
+            ++pp_it;
+#else
             // Reduce velocity by 1 unit, preserving direction.
             if (p[i].x > pp[i].x)
                 ++pp[i].x;
@@ -191,6 +343,7 @@ void simulation_step(void)
                 ++pp[i].y;
             else if (p[i].y < pp[i].y)
                 --pp[i].y;
+#endif // SIM_USE_POINTER_ITERATION
         }
     }
 #endif // SIM_FRICTION_ENABLED
