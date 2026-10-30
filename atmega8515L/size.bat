@@ -1,5 +1,12 @@
 @echo off
-pushd "%~dp0build" || exit /b 1
+setlocal
+
+set "ROOT=%~dp0..\"
+set "BUILD=%ROOT%build\"
+set "OUT=%BUILD%atmega8515L\"
+
+cd /d "%OUT%"
+
 
 echo.
 echo === Column meanings ===
@@ -18,3 +25,5 @@ echo SRAM usage  = data + bss
 echo.
 
 popd
+
+endlocal
