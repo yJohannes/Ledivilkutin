@@ -27,7 +27,7 @@ class Simulation:
     def set_acceleration(self, a: Vec2):
         self.acceleration = a
 
-    def simulate_frame(self):
+    def simulation_step(self):
         p = self.p
         pp = self.pp
         self.frame_counter += 1
