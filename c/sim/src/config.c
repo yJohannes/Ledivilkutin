@@ -1,5 +1,6 @@
-#include "config.h"
+#ifdef SIM_USE_DYNAMIC
 
+#include "config.h"
 
 sim_config cfg = {
     .fps                        = SIM_DEFAULT_FPS,
@@ -13,3 +14,5 @@ sim_config cfg = {
     .friction_interval          = SIM_DEFAULT_FRICTION_INTERVAL,
     .friction_remainder         = SIM_DEFAULT_FRICTION_REMAINDER,
 };
+
+#endif // SIM_USE_DYNAMIC
