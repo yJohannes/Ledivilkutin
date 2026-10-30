@@ -17,8 +17,8 @@ extern vec2i a;                         // current acceleration
 extern vec2u16 cum_com;                 // Cumulative center of mass
 extern uint8_t frame_counter;           // Current simulation frame
 
-void initialize_positions(void);
-void simulate_frame(void);
+void simulation_init(void);
+void simulation_step(void);
 
 
 #ifdef __cplusplus

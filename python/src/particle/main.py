@@ -53,7 +53,7 @@ def main():
         # if acceleration is not None:
             # sim.set_acceleration(acceleration)
 
-        sim.simulate_frame()
+        sim.simulation_step()
 
         render(screen, font, sim)
 

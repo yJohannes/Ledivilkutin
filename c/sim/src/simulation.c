@@ -19,7 +19,7 @@ vec2u16 cum_com;
 uint8_t frame_counter;
 
 
-void initialize_positions(void)
+void simulation_init(void)
 {
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; i++)
     {
@@ -36,7 +36,7 @@ void initialize_positions(void)
 }
 
 
-void simulate_frame(void)
+void simulation_step(void)
 {
     ++frame_counter;
 

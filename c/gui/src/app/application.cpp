@@ -22,7 +22,7 @@ namespace ledv::gui
     Application::Application(Window& window)
         : window_(window)
     {
-        initialize_positions();
+        simulation_init();
     }
 
     int Application::Run()
@@ -60,7 +60,7 @@ namespace ledv::gui
                               << std::format("a_scaled: [{:>6},{:>6}]", a.x, a.y)
                               << '\n';
 
-                    simulate_frame();
+                    simulation_step();
                     gui_cfg.next_frame_requested = false;
                 }
 
