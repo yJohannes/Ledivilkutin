@@ -1,6 +1,8 @@
 
 #include "serial_controller.h"
 
+#include <Windows.h>
+
 #include <sstream>
 #include <iostream>
 #include <string_view>

@@ -1,9 +1,9 @@
-
 #include <avr/io.h>
 
 #include "i2c.h"
 #include "mpu6050.h"
 #include "simulation.h"
+
 
 int main()
 {
@@ -11,7 +11,7 @@ int main()
     mpu6050_init();
 
     // Start interrupts
-
+    
 
     simulation_init();
 
