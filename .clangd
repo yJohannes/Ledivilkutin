@@ -4,6 +4,11 @@ CompileFlags:
   Add:
     - -Iinclude
 
+    - --target=avr
+    - -mmcu=atmega328p
+    - -isystem
+    - "C:/msys64/ucrt64/avr/include"
+
 Diagnostics:
   ClangTidy:
     Add:
