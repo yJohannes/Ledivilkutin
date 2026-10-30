@@ -1,0 +1,11 @@
+With Os:
+   text    data     bss     dec     hex filename
+   2090       0     309    2399     95f firmware.elf
+
+With O2:
+   text    data     bss     dec     hex filename
+   2420       0     309    2729     aa9 firmware.elf
+
+With O3:
+   text    data     bss     dec     hex filename
+   3060       0     309    3369     d29 firmware.elf

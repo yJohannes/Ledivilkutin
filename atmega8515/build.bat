@@ -37,7 +37,9 @@ echo %OUT%
 
 cd /d "%OUT%"
 
-avr-gcc -mmcu=atmega8515 -Os -DF_CPU=8000000UL ^
+avr-gcc -mmcu=atmega8515 ^
+    -O3 ^
+    -DF_CPU=8000000UL ^
     -DSIM_INTEGRATION_ENABLED ^
     -DSIM_COLLISIONS_ENABLED ^
     -DSIM_COM_ENABLED ^
