@@ -1,0 +1,39 @@
+CompileFlags:
+  CompilationDatabase: build
+
+  Add:
+    - -I../build/atmega8515L
+    - --target=avr
+    - -mmcu=atmega328p
+    - -isystem
+    - "C:/msys64/ucrt64/avr/include"
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - cppcoreguidelines-*
+      - modernize-*
+      - performance-*
+      - readability-*
+    Remove:
+      - bugprone-easily-swappable-parameters
+      - cppcoreguidelines-avoid-c-arrays
+      - cppcoreguidelines-avoid-magic-numbers
+      - cppcoreguidelines-avoid-non-const-global-variables
+      - cppcoreguidelines-init-variables
+      - cppcoreguidelines-macro-usage
+      - cppcoreguidelines-pro-bounds-constant-array-index
+      - cppcoreguidelines-pro-bounds-pointer-arithmetic
+      - cppcoreguidelines-pro-type-vararg
+      - modernize-use-trailing-return-type
+      - readability-identifier-length
+      - readability-avoid-nested-conditional-operator
+      - readability-braces-around-statements
+      - readability-enum-initial-value
+      - readability-math-missing-parentheses
+      - readability-implicit-bool-conversion
+      - readability-uppercase-literal-suffix
+
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
