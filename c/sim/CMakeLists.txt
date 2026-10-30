@@ -8,6 +8,14 @@ add_library(fluid_simulation
     ${CMAKE_CURRENT_SOURCE_DIR}/src/int_arithmetic.c
 )
 
+target_compile_definitions(fluid_simulation
+    PUBLIC
+        SIM_USE_DYNAMIC
+        SIM_INTEGRATION_ENABLED
+        SIM_COLLISIONS_ENABLED
+        SIM_COM_ENABLED
+        SIM_FRICTION_ENABLED
+)
 
 target_include_directories(fluid_simulation
     PUBLIC
