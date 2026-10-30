@@ -13,7 +13,6 @@ vec2u p[SIM_PARTICLE_COUNT];
 vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
 vec2u16 cum_com;
-uint8_t frame_counter;
 
 
 // Set timers
@@ -28,7 +27,7 @@ void simulation_init(void)
     com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
     friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
 
-    for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; i++)
+    for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
     {
         int8_t x = (i % 9) - 4;
         int8_t y = (i / 9) - 4;
@@ -46,8 +45,6 @@ void simulation_init(void)
 
 void simulation_step(void)
 {
-    ++frame_counter;
-
     // Choose acceleration
     int8_t ax = 0u;
     int8_t ay = 0u;
