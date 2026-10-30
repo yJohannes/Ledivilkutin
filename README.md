@@ -2,8 +2,8 @@
 ## Logs
 
 30/10/2026
-- Prepare 
-- Performance testing and optimization
+- Prepare code for programming the microcontroller.
+- Performance testing and optimizations,
 
 29/10/2026
 - Finished porting the simulation.
