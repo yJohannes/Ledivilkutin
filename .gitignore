@@ -1,6 +1,7 @@
 # Folders
 archive/private
 docs/private
+libraries/MPU6050_I2C/src
 **/__pycache__/
 **/build/
 .cache
