@@ -1,7 +1,9 @@
-# README
-Hi
-
+# Ledivilkutin
 ## Logs
+
+30/10/2026
+- Prepare 
+- Performance testing and optimization
 
 29/10/2026
 - Finished porting the simulation.
