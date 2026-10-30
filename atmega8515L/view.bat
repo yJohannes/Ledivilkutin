@@ -1,8 +1,12 @@
 @echo off
 setlocal
 
-REM Change cwd to atmega8515L/build
-cd /d "%~dp0build"
+set "ROOT=%~dp0..\"
+set "BUILD=%ROOT%build\"
+set "OUT=%BUILD%atmega8515L\"
+
+cd /d "%OUT%"
+
 echo Current working directory: "%CD%"
 
 REM Check that firmware.elf exists
@@ -20,3 +24,5 @@ echo Assembly listing generated: firmware.lst
 
 REM Open the listing in Notepad
 notepad firmware.lst
+
+endlocal
