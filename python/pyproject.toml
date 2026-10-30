@@ -12,6 +12,9 @@ dependencies = [
     "pyserial (>=3.5,<4.0)",
 ]
 
+[virtualenvs]
+in-project = true
+
 [tool.poetry]
 package-mode = false
 

@@ -61,3 +61,7 @@
 
 pre
 - Started working on a grid based fluid simulation.
+
+
+## Programming checklist
+- Set correct platform in `i2c_config.h`.

@@ -1,3 +1,5 @@
 {
-    "cmake.sourceDirectory": "C:/Dev/Ledivilkutin"
+    "cmake.sourceDirectory": "C:/Dev/Ledivilkutin/c",
+    "cmake.buildDirectory": "${workspaceFolder}/build/c"
+
 }

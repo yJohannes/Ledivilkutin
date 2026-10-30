@@ -2,6 +2,7 @@
 **/__pycache__/
 **/build/
 .cache
+.venv
 
 # Copied from c/mpu6050_i2c by arduino/sync_lib.bat
 arduino/libraries/MPU6050_I2C/src
