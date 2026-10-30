@@ -25,7 +25,7 @@ if not exist "%SOURCE%\src" (
 )
 
 REM Copy project source files into the library src directory
-robocopy "%SRC_CODE%" "%SOURCE%\src" /E /XD .git
+robocopy "%SRC_CODE%" "%SOURCE%\src" /MIR /XD .git
 
 REM Robocopy exit codes below 8 indicate success
 if errorlevel 8 (
