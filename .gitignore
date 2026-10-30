@@ -1,10 +1,10 @@
 # Folders
-archive/private
-docs/private
-libraries/MPU6050_I2C/src
 **/__pycache__/
 **/build/
 .cache
+
+# Copied from c/mpu6050_i2c by arduino/sync_lib.bat
+arduino/libraries/MPU6050_I2C/src
 
 # Files
 *.exe
