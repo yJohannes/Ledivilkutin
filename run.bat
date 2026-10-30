@@ -1,4 +1,3 @@
-
 @echo off
 if "%~1"=="gui" (
     build\c\gui\fluid_simulation_gui.exe
