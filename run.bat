@@ -5,6 +5,6 @@ if "%~1"=="gui" (
 ) else if "%~1"=="a" (
     echo a
 ) else (
-    echo Usage: run ^<cli^|gui^|uci^>
+    echo Usage: run ^<empty^|gui^>
     exit /b 1
 )
