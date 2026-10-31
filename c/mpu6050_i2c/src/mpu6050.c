@@ -143,7 +143,7 @@ bool mpu6050_read_accel_i8(int8_t *ax, int8_t *ay, int8_t *az)
     if (ax == NULL || ay == NULL || az == NULL)
         return false;
 
-    uint8_t raw[6];
+    uint8_t raw[5];
 
     if (!i2c_read_registers(
             MPU6050_ADDR,
@@ -189,7 +189,6 @@ bool mpu6050_read_accel_xy_i8(int8_t *ax, int8_t *ay)
     if (ax == NULL || ay == NULL)
         return false;
 
-    uint8_t raw[4];
 
     if (!i2c_read_registers(
             MPU6050_ADDR,
