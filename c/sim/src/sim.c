@@ -27,6 +27,8 @@ void simulation_init(void)
     sim_prev_com.y = 128u;
 
     sim_accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
+    sim_com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
+    sim_friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
 
 
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
