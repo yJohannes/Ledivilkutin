@@ -172,10 +172,10 @@ namespace ledv::gui
             // Center of mass and effective radius.
             // Assumes `sim` is the C++ simulation instance.
             const float com_x =
-                static_cast<float>(cum_com.x / SIM_PARTICLE_COUNT);
+                static_cast<float>(sim_cum_com.x / SIM_PARTICLE_COUNT);
 
             const float com_y =
-                static_cast<float>(cum_com.y / SIM_PARTICLE_COUNT);
+                static_cast<float>(sim_cum_com.y / SIM_PARTICLE_COUNT);
 
             const ImVec2 center(
                 origin.x + (com_x / 256.0f) * grid_size.x,

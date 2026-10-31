@@ -12,24 +12,21 @@
 vec2u p[SIM_PARTICLE_COUNT];
 vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
-vec2u16 cum_com;
+vec2u16 sim_cum_com;
 uint8_t sim_accel_timer;
 
-static vec2u prev_com;
+static vec2u sim_prev_com; // not currently in use
 
-static uint8_t accel_timer;
-static uint8_t com_timer;
-static uint8_t friction_timer;
+static uint8_t sim_com_timer;
+static uint8_t sim_friction_timer;
 
 
 void simulation_init(void)
 {
-    prev_com.x = 128u;
-    prev_com.y = 128u;
+    sim_prev_com.x = 128u;
+    sim_prev_com.y = 128u;
 
-    accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
-    com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
-    friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
+    sim_accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
 
 
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
@@ -236,12 +233,12 @@ void simulation_step(void)
 #ifdef SIM_COM_ENABLED
 
     // Calculate COM
-    if (--com_timer == 0)
+    if (--sim_com_timer == 0)
     {
-        com_timer = SIM_CENTER_OF_MASS_INTERVAL;
+        sim_com_timer = SIM_CENTER_OF_MASS_INTERVAL;
 
-        cum_com.x = 0u;
-        cum_com.y = 0u;
+        sim_cum_com.x = 0u;
+        sim_cum_com.y = 0u;
 
 
 #ifdef SIM_USE_POINTER_ITERATION
@@ -249,22 +246,22 @@ void simulation_step(void)
 
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i, ++p_it)
         {
-            cum_com.x += p_it->x;
-            cum_com.y += p_it->y;
+            sim_cum_com.x += p_it->x;
+            sim_cum_com.y += p_it->y;
         }
 #else
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
         {
-            cum_com.x += p[i].x;
-            cum_com.y += p[i].y;
+            sim_cum_com.x += p[i].x;
+            sim_cum_com.y += p[i].y;
         }
 #endif // SIM_USE_POINTER_ITERATION
 
-        uint8_t com_x = cum_com.x / SIM_PARTICLE_COUNT;
-        uint8_t com_y = cum_com.y / SIM_PARTICLE_COUNT;
+        uint8_t com_x = sim_cum_com.x / SIM_PARTICLE_COUNT;
+        uint8_t com_y = sim_cum_com.y / SIM_PARTICLE_COUNT;
 
-        prev_com.x = com_x;
-        prev_com.y = com_y;
+        sim_prev_com.x = com_x;
+        sim_prev_com.y = com_y;
 
         // Move towards COM by one unit
 #ifdef SIM_USE_POINTER_ITERATION
@@ -304,9 +301,9 @@ void simulation_step(void)
     // Apply friction (experimental)
 
 
-    if (--friction_timer == 0)
+    if (--sim_friction_timer == 0)
     {
-        friction_timer = SIM_FRICTION_INTERVAL;
+        sim_friction_timer = SIM_FRICTION_INTERVAL;
 
 #ifdef SIM_USE_POINTER_ITERATION
         p_it = p;
