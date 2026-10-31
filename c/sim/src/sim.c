@@ -196,11 +196,8 @@ void simulation_step(void)
             {
                 overlap = SIM_PARTICLE_MIN_DISTANCE - ax;
 
-                correction_i = overlap >> 1; // Half of the overlap
-                correction_j = overlap - correction_i;
-
-                // correction_i = dx < 0 ? correction_i : -correction_i;
-                // correction_j = dx < 0 ? -correction_j : correction_j;
+                corr_i = overlap >> 1; // Half of the overlap
+                corr_j = overlap - corr_i;
 
 
                 corr_i = dx_negative ?  corr_i : -corr_i;
@@ -214,7 +211,8 @@ void simulation_step(void)
             {
                 overlap = SIM_PARTICLE_MIN_DISTANCE - ay;
 
-                correction_i = overlap >> 1;
+                corr_i = overlap >> 1;
+                corr_j = overlap - corr_i;
 
 
                 corr_i = dy_negative ?  corr_i : -corr_i;
