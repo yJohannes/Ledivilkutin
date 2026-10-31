@@ -28,6 +28,9 @@ extern "C" {
 /// @brief Initialize PIN_SDA and PIN_SCL for I2C
 void i2c_init(void);
 
+/// @brief Release PIN_SDA and PIN_SCL.
+void i2c_release_pins(void);
+
 /// @brief Check if target device acknowledges.
 /// @returns true on success
 bool i2c_check_ack(uint8_t addr);

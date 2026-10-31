@@ -53,11 +53,17 @@ static void i2c_write_ack(bool ack)
     i2c_sda_release();
 }
 
+
+void i2c_release_pins(void)
+{
+    i2c_scl_release();
+    i2c_sda_release();
+}
+
+
 void i2c_init(void)
 {
-  // Release pull-up
-  i2c_scl_release();
-  i2c_sda_release();
+    i2c_release_pins();
 }
 
 static void i2c_start(void)
