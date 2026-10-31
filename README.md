@@ -1,9 +1,14 @@
 # Ledivilkutin
+
 ## Logs
+
+31/10/2026
+- Prepare code for programming the microcontroller.
+- Performance testing and optimizations.
 
 30/10/2026
 - Prepare code for programming the microcontroller.
-- Performance testing and optimizations,
+- Performance testing and optimizations.
 
 29/10/2026
 - Finished porting the simulation.
@@ -63,5 +68,15 @@ pre
 - Started working on a grid based fluid simulation in Python.
 
 
-## Programming checklist
+## Programming the microcontroller checklist
+
+### Before programming
 - Set correct platform in `i2c_config.h`.
+- Compile with -O2 not -Os.
+
+### After programming
+- Wire VCC, GND, AD0->GND, SDA->PB5 and SCL->PB6.
+- Ask for an additional piece of two-sided tape for the accelerometer.
+
+### Reprogramming
+- Disconnect MPU6050.
