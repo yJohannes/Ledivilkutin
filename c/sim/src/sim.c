@@ -16,7 +16,6 @@ vec2u16 cum_com;
 
 static vec2u prev_com;
 
-// Set timers
 static uint8_t accel_timer;
 static uint8_t com_timer;
 static uint8_t friction_timer;
@@ -24,12 +23,13 @@ static uint8_t friction_timer;
 
 void simulation_init(void)
 {
+    prev_com.x = 128u;
+    prev_com.y = 128u;
+
     accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
     com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
     friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
 
-    prev_com = (vec2u)
-    {
         128u,
         128u
     };
