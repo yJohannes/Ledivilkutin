@@ -189,8 +189,8 @@ void simulation_step(void)
             bool dy_negative = p[j].y < p[i].y;
 
             uint8_t overlap;
-            int8_t correction_i;
-            int8_t correction_j;
+            int8_t corr_i;
+            int8_t corr_j;
 
             if (ax >= ay)
             {
@@ -203,29 +203,26 @@ void simulation_step(void)
                 // correction_j = dx < 0 ? -correction_j : correction_j;
 
 
-                correction_i = dx_negative ? correction_i : -correction_i;
-                correction_j = dx_negative ? -correction_j : correction_j;
+                corr_i = dx_negative ?  corr_i : -corr_i;
+                corr_j = dx_negative ? -corr_j :  corr_j;
 
                 // Use try_add because it prevents weird border behaviour
-                p[i].x = try_add_u8_s8(p[i].x, correction_i);
-                p[j].x = try_add_u8_s8(p[j].x, correction_j);
+                p[i].x = try_add_u8_s8(p[i].x, corr_i);
+                p[j].x = try_add_u8_s8(p[j].x, corr_j);
             }
             else
             {
                 overlap = SIM_PARTICLE_MIN_DISTANCE - ay;
 
                 correction_i = overlap >> 1;
-                correction_j = overlap - correction_i;
 
-                // correction_i = dy < 0 ? correction_i : -correction_i;
-                // correction_j = dy < 0 ? -correction_j : correction_j;
 
-                correction_i = dy_negative ? correction_i : -correction_i;
-                correction_j = dy_negative ? -correction_j : correction_j;
+                corr_i = dy_negative ?  corr_i : -corr_i;
+                corr_j = dy_negative ? -corr_j :  corr_j;
 
                 // Use try_add because it prevents weird border behaviour
-                p[i].y = try_add_u8_s8(p[i].y, correction_i);
-                p[j].y = try_add_u8_s8(p[j].y, correction_j);
+                p[i].y = try_add_u8_s8(p[i].y, corr_i);
+                p[j].y = try_add_u8_s8(p[j].y, corr_j);
             }
         }
     }
