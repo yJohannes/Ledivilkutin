@@ -15,6 +15,7 @@ extern vec2u p[SIM_PARTICLE_COUNT];     // current position
 extern vec2u pp[SIM_PARTICLE_COUNT];    // previous position
 extern vec2i a;                         // current acceleration
 extern vec2u16 cum_com;                 // Cumulative center of mass
+extern uint8_t sim_accel_timer;      // When 0 applies acceleration on sim step.
 
 void simulation_init(void);
 void simulation_step(void);

@@ -13,6 +13,7 @@ vec2u p[SIM_PARTICLE_COUNT];
 vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
 vec2u16 cum_com;
+uint8_t sim_accel_timer;
 
 static vec2u prev_com;
 
@@ -49,18 +50,6 @@ void simulation_init(void)
 
 void simulation_step(void)
 {
-    // Choose acceleration
-    int8_t ax = 0u;
-    int8_t ay = 0u;
-
-    if (--accel_timer == 0)
-    {
-        accel_timer = SIM_ACCELERATION_INTERVAL;
-
-        ax = a.x;
-        ay = a.y;
-    }
-
 #ifdef SIM_INTEGRATION_ENABLED
 
 #ifdef SIM_USE_POINTER_ITERATION
@@ -84,8 +73,8 @@ void simulation_step(void)
         pp_it->x = x;  // reuse locals, no reload
         pp_it->y = y;
 
-        p_it->x = try_add_u8_s8(x, dx + ax);
-        p_it->y = try_add_u8_s8(y, dy + ay);
+        p_it->x = try_add_u8_s8(x, dx + a.x);
+        p_it->y = try_add_u8_s8(y, dy + a.y);
     }
 #else
     // Integrate positions using Verlet integration
@@ -115,8 +104,8 @@ void simulation_step(void)
         // new_x = x + dx + a
         // Use try_add because it prevents weird border behaviour
         // Trust that dx + a.x won't over/underflow :] (it shouldn't)
-        p[i].x = try_add_u8_s8(p[i].x, dx + ax);
-        p[i].y = try_add_u8_s8(p[i].y, dy + ay);
+        p[i].x = try_add_u8_s8(p[i].x, dx + a.x);
+        p[i].y = try_add_u8_s8(p[i].y, dy + a.y);
     }
 #endif // SIM_USE_POINTER_ITERATION
 #endif // SIM_INTEGRATION_ENABLED

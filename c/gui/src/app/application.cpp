@@ -60,6 +60,18 @@ namespace ledv::gui
                               << std::format("a_scaled: [{:>6},{:>6}]", a.x, a.y)
                               << '\n';
 
+                    // Choose acceleration
+                    // This is moved out of simulation_step for performance.
+                    if (--sim_accel_timer == 0)
+                    {
+                        sim_accel_timer = SIM_ACCELERATION_INTERVAL;
+                    }
+                    else
+                    {
+                        a.x = 0u;
+                        a.y = 0u;
+                    }
+
                     simulation_step();
                     gui_cfg.next_frame_requested = false;
                 }
