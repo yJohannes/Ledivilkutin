@@ -57,10 +57,10 @@
 - Got the MPU6050 GY-521 for reading acceleration.
 
 29/9/2026
-- Bought 220 LEDs
+- Bought 220 LEDs.
 
 pre
-- Started working on a grid based fluid simulation.
+- Started working on a grid based fluid simulation in Python.
 
 
 ## Programming checklist
