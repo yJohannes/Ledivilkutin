@@ -21,14 +21,14 @@ copy "%ROOT%c\mpu6050_i2c\src\mpu6050_regs.h" "%OUT%\"
 copy "%ROOT%c\mpu6050_i2c\src\mpu6050.c" "%OUT%\"
 copy "%ROOT%c\mpu6050_i2c\src\mpu6050.h" "%OUT%\"
 
-copy "%ROOT%c\sim\include\sim\config.h" "%OUT%\"
-copy "%ROOT%c\sim\include\sim\simulation.h" "%OUT%\"
+copy "%ROOT%c\sim\include\sim\sim_config.h" "%OUT%\"
+copy "%ROOT%c\sim\include\sim\sim.h" "%OUT%\"
 copy "%ROOT%c\sim\include\sim\vec2.h" "%OUT%\"
 
-copy "%ROOT%c\sim\src\config.c" "%OUT%\"
+copy "%ROOT%c\sim\src\sim_config.c" "%OUT%\"
+copy "%ROOT%c\sim\src\sim.c" "%OUT%\"
 copy "%ROOT%c\sim\src\int_arithmetic.c" "%OUT%\"
 copy "%ROOT%c\sim\src\int_arithmetic.h" "%OUT%\"
-copy "%ROOT%c\sim\src\simulation.c" "%OUT%\"
 copy "%ROOT%c\sim\src\utils.h" "%OUT%\"
 
 echo.
@@ -38,7 +38,7 @@ echo %OUT%
 cd /d "%OUT%"
 
 avr-gcc -mmcu=atmega8515 ^
-    -O3 ^
+    -O2 ^
     -DF_CPU=8000000UL ^
     -DSIM_INTEGRATION_ENABLED ^
     -DSIM_COLLISIONS_ENABLED ^
@@ -48,9 +48,9 @@ avr-gcc -mmcu=atmega8515 ^
     main.c ^
     i2c.c ^
     mpu6050.c ^
-    config.c ^
+    sim_config.c ^
     int_arithmetic.c ^
-    simulation.c ^
+    sim.c ^
     -o firmware.elf
 
 if errorlevel 1 exit /b 1
