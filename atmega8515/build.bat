@@ -3,14 +3,14 @@ setlocal
 
 set "ROOT=%~dp0..\"
 set "BUILD=%ROOT%build\"
-set "OUT=%BUILD%atmega8515L\"
+set "OUT=%BUILD%atmega8515\"
 
 mkdir "%BUILD%"
 if exist "%OUT%" rmdir /s /q "%OUT%"
 mkdir "%OUT%"
 
 REM Copy main.c
-copy "%ROOT%atmega8515L\main.c" "%OUT%\"
+copy "%ROOT%atmega8515\main.c" "%OUT%\"
 
 REM Copy simulation and mpu6050 + i2c files
 copy "%ROOT%c\mpu6050_i2c\src\i2c_avr.c" "%OUT%\"
@@ -63,7 +63,7 @@ echo Build successful: firmware.hex
 
 if errorlevel 1 exit /b 1
 
-call "%ROOT%\atmega8515L\size.bat"
+call "%ROOT%\atmega8515\size.bat"
 
 if errorlevel 1 exit /b 1
 

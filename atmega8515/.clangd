@@ -1,8 +1,8 @@
 CompileFlags:
-  CompilationDatabase: build
+  CompilationDatabase: ../build/atmega8515
 
   Add:
-    - -I../build/atmega8515L
+    - -I../build/atmega8515
     - --target=avr
     - -mmcu=atmega328p
     - -isystem

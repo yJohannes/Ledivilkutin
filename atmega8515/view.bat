@@ -3,7 +3,7 @@ setlocal
 
 set "ROOT=%~dp0..\"
 set "BUILD=%ROOT%build\"
-set "OUT=%BUILD%atmega8515L\"
+set "OUT=%BUILD%atmega8515"
 
 cd /d "%OUT%"
 
