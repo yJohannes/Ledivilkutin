@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include <sim/simulation.h>
+#include <sim/sim.h>
 
 
 int main() {
