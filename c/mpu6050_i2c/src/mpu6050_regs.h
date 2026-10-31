@@ -1,7 +1,14 @@
-/// @file mpu6050.h
+/// @file mpu6050_regs.h
 /// @author Johannes Ylinen
 /// @brief Register addresses and flags for MPU6050.
 /// @see https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf
+
+#ifndef MPU6050_REGS_H
+#define MPU6050_REGS_H
+
+
+#define MPU6050_ADDR     0x68
+#define MPU6050_WHO_AM_I 0x68
 
 #define MPU6050_REG_CONFIG 0x1A
 
@@ -48,3 +55,6 @@
 #define MPU6050_REG_ACCEL_YOUT_L 0x3E
 #define MPU6050_REG_ACCEL_ZOUT_H MPU6050_REG_ACCEL_ZOUT
 #define MPU6050_REG_ACCEL_ZOUT_L 0x40
+
+
+#endif // MPU6050_REGS_H

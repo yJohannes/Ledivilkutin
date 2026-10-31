@@ -8,12 +8,7 @@
 #define MPU6050_H
 
 #include <stdint.h>
-
-#include "mpu6050_regs.h"
-#include "i2c.h"
-
-#define MPU6050_ADDR     0x68
-#define MPU6050_WHO_AM_I 0x68
+#include <stdbool.h>
 
 
 #ifdef __cplusplus
