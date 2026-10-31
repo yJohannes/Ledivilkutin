@@ -26,6 +26,7 @@ extern "C" {
 void i2c_init(void);
 
 /// @brief Release PIN_SDA and PIN_SCL.
+/// Does not mean I2C is disabled.
 void i2c_release_pins(void);
 
 /// @brief Check if target device acknowledges.
