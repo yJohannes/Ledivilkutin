@@ -1,9 +1,11 @@
 #include "mpu6050.h"
-#include "i2c.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h> // // NULL
+
+#include "mpu6050_regs.h"
+#include "i2c.h"
 
 
 static bool mpu6050_check_identity(void)
@@ -19,10 +21,9 @@ static bool mpu6050_check_identity(void)
     return id == MPU6050_WHO_AM_I;
 }
 
-// ------------------------------------------------ //
-// MPU6050 to Accelerometer Only Low Power Mode //
-// ------------------------------------------------ //
-// https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf#%5B%7B%22num%22%3A92%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C63%2C692%2C0%5D
+
+/// @brief Set MPU6050 to Accelerometer XY only & Low Power Mode
+/// @see https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf#%5B%7B%22num%22%3A92%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C63%2C692%2C0%5D
 static bool mpu6050_set_accel_only_low_power(void)
 {
     uint8_t pwr_mgmt_1;
@@ -73,10 +74,12 @@ static bool mpu6050_set_accel_only_low_power(void)
     return true;
 }
 
+
 bool mpu6050_test_connection(void)
 {
     return i2c_check_ack(MPU6050_ADDR);
 }
+
 
 bool mpu6050_init(void)
 {
@@ -91,6 +94,7 @@ bool mpu6050_init(void)
 
     return true;
 }
+
 
 bool mpu6050_set_sleep(bool sleep)
 {
@@ -116,6 +120,7 @@ bool mpu6050_set_sleep(bool sleep)
     return true;
 }
 
+
 bool mpu6050_read_accel(int16_t* ax, int16_t* ay, int16_t* az)
 {
     if (ax == NULL || ay == NULL || az == NULL)
@@ -137,6 +142,7 @@ bool mpu6050_read_accel(int16_t* ax, int16_t* ay, int16_t* az)
 
     return true;
 }
+
 
 bool mpu6050_read_accel_i8(int8_t *ax, int8_t *ay, int8_t *az)
 {
@@ -184,11 +190,13 @@ bool mpu6050_read_accel_xy(int16_t* ax, int16_t* ay)
     return true;
 }
 
+
 bool mpu6050_read_accel_xy_i8(int8_t *ax, int8_t *ay)
 {
     if (ax == NULL || ay == NULL)
         return false;
 
+    uint8_t raw[3];
 
     if (!i2c_read_registers(
             MPU6050_ADDR,
