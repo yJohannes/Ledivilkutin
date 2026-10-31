@@ -50,6 +50,9 @@ bool running = false;
 // (INT0) PD2 / External Interrupt Request 0
 ISR(INT0_vect)
 {
+    // Disable INT0 to prevent additional interrupts during debouncing
+    GICR &= ~(1 << INT0);
+
     button_pressed = true;
 }
 
@@ -96,7 +99,40 @@ int main()
     while (!button_pressed)
     {
 
+/// @returns true if the button remained pressed after the debounce interval;
+///          false if the interrupt was caused by contact bounce.
+bool debounce_button(void)
+{
+    // Wait for mechanical contact bouncing to settle
+    _delay_ms(DEBOUNCE_DELAY_MS);
+
+    // Check whether the button is still pressed (PD2 LOW)
+    bool valid_press = !(PIND & (1 << PD2));
+
+    if (valid_press)
+    {
+        // Wait until button is released
+        while (!(PIND & (1 << PD2)))
+        {
+        }
+
+        // Wait for release bouncing to settle
+        _delay_ms(DEBOUNCE_DELAY_MS);
     }
+
+    // Clear button flag and pending interrupt
+    cli();
+
+    button_pressed = false;
+    GIFR |= (1 << INTF0);
+
+    // Re-enable INT0
+    GICR |= (1 << INT0);
+
+    sei();
+
+    return valid_press;
+}
 
 int main()
 {
