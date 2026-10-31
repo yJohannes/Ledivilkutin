@@ -1,4 +1,4 @@
-#include "simulation.h"
+#include "sim.h"
 
 #include <stdint.h>
 #include <stdbool.h>

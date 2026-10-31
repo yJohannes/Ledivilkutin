@@ -3,8 +3,8 @@
 # =========================
 
 add_library(fluid_simulation
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/simulation.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sim.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sim_config.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/int_arithmetic.c
 )
 

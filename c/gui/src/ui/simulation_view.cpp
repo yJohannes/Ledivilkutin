@@ -7,10 +7,10 @@
 
 #include <imgui.h>
 
-#include <sim/config.h>
-#include <sim/simulation.h>
+#include <sim/sim_config.h>
+#include <sim/sim.h>
 
-#include "config.h"
+#include "gui_config.h"
 
 namespace ledv::gui
 {

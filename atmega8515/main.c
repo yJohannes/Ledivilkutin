@@ -6,7 +6,7 @@
 
 #include "i2c.h"
 #include "mpu6050.h"
-#include "simulation.h"
+#include "sim.h"
 
 
 volatile bool button_pressed = false;
