@@ -185,8 +185,6 @@ void simulation_step(void)
                 ay >= SIM_PARTICLE_MIN_DISTANCE)
                 continue;
 
-            bool dx_negative = p[j].x < p[i].x;
-            bool dy_negative = p[j].y < p[i].y;
 
             uint8_t overlap;
             int8_t corr_i;
@@ -199,6 +197,7 @@ void simulation_step(void)
                 corr_i = overlap >> 1; // Half of the overlap
                 corr_j = overlap - corr_i;
 
+                bool dx_negative = p[j].x < p[i].x;
 
                 corr_i = dx_negative ?  corr_i : -corr_i;
                 corr_j = dx_negative ? -corr_j :  corr_j;
@@ -214,6 +213,7 @@ void simulation_step(void)
                 corr_i = overlap >> 1;
                 corr_j = overlap - corr_i;
 
+                bool dy_negative = p[j].y < p[i].y;
 
                 corr_i = dy_negative ?  corr_i : -corr_i;
                 corr_j = dy_negative ? -corr_j :  corr_j;
