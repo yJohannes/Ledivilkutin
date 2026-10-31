@@ -178,16 +178,6 @@ void simulation_step(void)
         // Handle each pair only
         for (uint8_t j = i + 1; j < SIM_PARTICLE_COUNT; ++j)
         {
-            // TODO: optimize here possibly
-
-            // KOKEILE TÄTÄ IDEAA:
-            // uint8_t xj = p[j].x;
-            // uint8_t yj = p[j].y;
-
-            // bool right = xj >= xi;
-            // bool below = yj >= yi;
-            // uint8_t ax = right ? xj - xi : xi - xj;
-            // uint8_t ay = below ? yj - yi : yi - yj;
 
             // // Bitwise | avoids a second branch
             // if ((ax >= SIM_PARTICLE_MIN_DISTANCE) | (ay >= SIM_PARTICLE_MIN_DISTANCE))
