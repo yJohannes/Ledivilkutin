@@ -1,10 +1,8 @@
 /// @file i2c.h
 /// @author Johannes Ylinen
-/// @brief A very elementary I2C implementation for a
-/// master + slave configuration.
+/// @brief A very elementary I2C implementation for a MCU + MPU6050.
 ///
 /// @see https://www.nxp.com/docs/en/user-guide/UM10204.pdf
-
 
 #ifndef I2C_H
 #define I2C_H
@@ -16,7 +14,6 @@
 #define I2C_WRITE 0
 #define I2C_READ  1
 
-/// @warning in reality ACK=LOW=0
 #define I2C_ACK   true
 #define I2C_NACK  false
 
@@ -25,7 +22,7 @@
 extern "C" {
 #endif
 
-/// @brief Initialize PIN_SDA and PIN_SCL for I2C
+/// @brief Initialize PIN_SDA and PIN_SCL for I2C.
 void i2c_init(void);
 
 /// @brief Release PIN_SDA and PIN_SCL.

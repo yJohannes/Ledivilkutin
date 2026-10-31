@@ -66,6 +66,8 @@ void i2c_init(void)
     i2c_release_pins();
 }
 
+
+/// @brief Start I2C transaction.
 static void i2c_start(void)
 {
     // Ensure SCL is low before preparing the START
@@ -85,6 +87,8 @@ static void i2c_start(void)
     i2c_scl_low();
 }
 
+
+/// @brief End I2C transaction.
 static void i2c_stop(void)
 {
     i2c_sda_low();
@@ -99,6 +103,8 @@ static void i2c_stop(void)
 }
 
 
+/// @brief Write a byte over I2C.
+/// Must have i2c_write_address_rw set prior.
 static bool i2c_write_byte(uint8_t data)
 {
     for (uint8_t i = 0; i < 8; ++i)
@@ -123,12 +129,19 @@ static bool i2c_write_byte(uint8_t data)
     return i2c_read_ack();
 }
 
+
+/// @brief Write the 7-bit address of target device
+/// and mode to the target device
+///
+/// @param addr target device address
+/// @param rw mode I2C_READ=1 or I2C_WRITE=0
 static bool i2c_write_address_rw(uint8_t addr, uint8_t rw)
 {
     return i2c_write_byte((addr << 1) | rw);
 }
 
 
+/// @param ack true if more bytes will be read
 static void i2c_read_byte(uint8_t* out_data, bool ack)
 {
     uint8_t value = 0;
@@ -156,6 +169,7 @@ static void i2c_read_byte(uint8_t* out_data, bool ack)
     i2c_write_ack(ack);
 }
 
+
 bool i2c_write_register(
     uint8_t addr,
     uint8_t reg,
@@ -181,6 +195,7 @@ fail:
     i2c_stop();
     return false;
 }
+
 
 bool i2c_read_register(
     uint8_t addr,
@@ -266,23 +281,3 @@ bool i2c_check_ack(uint8_t addr)
 
     return ack;
 }
-
-/// @brief Start I2C transaction.
-// void i2c_start(void);
-
-/// @brief End I2C transaction.
-// void i2c_stop(void);
-
-/// @brief Write a byte over I2C.
-/// Must have i2c_write_address_rw set prior.
-// bool i2c_write_byte(uint8_t data);
-
-/// @brief Write the 7-bit address of target device
-/// and mode to the target device
-///
-/// @param addr target device address
-/// @param rw mode I2C_READ=1 or I2C_WRITE=0
-// bool i2c_write_address_rw(uint8_t addr, uint8_t rw);
-
-/// @param ack true if more bytes will be read
-// void i2c_read_byte(uint8_t* out_data, bool ack);
