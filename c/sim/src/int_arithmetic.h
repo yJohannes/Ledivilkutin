@@ -27,4 +27,20 @@ static inline int8_t try_add_s8(int8_t x, int8_t y)
 }
 
 
+static inline uint8_t abs_diff_u8(uint8_t a, uint8_t b)
+{
+    return a > b ? a - b : b - a;
+}
+
+
+static inline uint8_t max_(uint8_t ax, uint8_t ay)
+{
+    return ax > ay ? ax : ay;
+}
+
+static inline uint8_t min_(uint8_t ax, uint8_t ay)
+{
+    return ax < ay ? ax : ay;
+}
+
 #endif // INT_ARITHMETIC_H
