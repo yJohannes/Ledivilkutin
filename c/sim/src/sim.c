@@ -30,9 +30,6 @@ void simulation_init(void)
     com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
     friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
 
-        128u,
-        128u
-    };
 
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
     {
