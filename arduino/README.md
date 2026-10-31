@@ -1,3 +1,4 @@
 # Arduino
-- Contains sim_bridge which is used to send `ax,ay\n` over serial to simulations.
-- The script `arduino/sync_lib.bat` is used to install the mpu6050_i2c library for Arduino IDE.
+
+- Contains `sim_bridge`, which reads accelerometer data and transmits it over serial in the format `ax,ay\n` for use by the simulations.
+- `arduino/sync_lib.bat` installs the `mpu6050_i2c` library required by the Arduino IDE.
