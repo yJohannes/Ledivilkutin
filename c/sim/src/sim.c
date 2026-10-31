@@ -158,8 +158,6 @@ void simulation_step(void)
     // }
 
 
-
-
     // Handle overlaps
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -175,10 +173,22 @@ void simulation_step(void)
             uint8_t ax = abs_diff_u8(p[j].x, p[i].x);
             uint8_t ay = abs_diff_u8(p[j].y, p[i].y);
 
+            // uint8_t L = 0u;
 
-            // Do axis-aligned separation
-            // uint8_t ax = dx > 0 ? dx : -dx;
-            // uint8_t ay = dy > 0 ? dy : -dy;
+            // bool overflow = __builtin_add_overflow(
+            //     max_(ax, ay),
+            //     min_(ax, ay) >> 1,
+            //     &L
+            // );
+
+            // if (overflow)
+            //     continue;
+
+            // Check the Euclidean distance but compute axis-aligned separation.
+            // if (L >= SIM_PARTICLE_MIN_DISTANCE)
+            //     continue;
+
+            // uint8_t overlap = SIM_PARTICLE_MIN_DISTANCE - L;
 
             // Already separated along at least one axis
             if (ax >= SIM_PARTICLE_MIN_DISTANCE ||
