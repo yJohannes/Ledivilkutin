@@ -37,6 +37,8 @@ echo %OUT%
 
 cd /d "%OUT%"
 
+@REM  -DSIM_USE_POINTER_ITERATION ^
+
 avr-gcc -mmcu=atmega8515 ^
     -O2 ^
     -DF_CPU=8000000UL ^
@@ -44,7 +46,6 @@ avr-gcc -mmcu=atmega8515 ^
     -DSIM_COLLISIONS_ENABLED ^
     -DSIM_COM_ENABLED ^
     -DSIM_FRICTION_ENABLED ^
-    -DSIM_USE_POINTER_ITERATION ^
     main.c ^
     i2c.c ^
     mpu6050.c ^
