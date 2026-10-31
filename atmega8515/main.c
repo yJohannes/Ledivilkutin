@@ -58,9 +58,36 @@ void button_init(void)
     // Enable INT0
     EIMSK;
 
-    
+}
 
-    MCUCR
+
+void init_interrupt(void)
+{
+    // DDRD is the Data Direction Register D
+    // DDRD bit = 0 → Input
+    // DDRD bit = 1 → Output
+
+    // Set PD2 as input
+    DDRD &= ~(1 << PD2);
+
+    // Enable internal pull-up resistor
+    PORTD |= (1 << PD2);
+
+
+    // Configure INT0 for falling edge
+    // ISC01 = 1, ISC00 = 0 is Falling edge
+    MCUCR |= (1 << ISC01);
+    MCUCR &= ~(1 << ISC00);
+
+    // Clear any pending INT0 interrupt flag
+    GIFR |= (1 << INTF0);
+
+    // Enable INT0
+    // p. 78
+    GICR |= (1 << INT0);
+
+    // Enable global interrupts !!!
+    sei();
 }
 
 int main()
@@ -71,6 +98,7 @@ int main()
 
     }
 
+    init_interrupt();
     i2c_init();
     mpu6050_init();
 
