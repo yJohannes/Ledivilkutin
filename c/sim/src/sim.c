@@ -183,17 +183,22 @@ void simulation_step(void)
             // if ((ax >= SIM_PARTICLE_MIN_DISTANCE) | (ay >= SIM_PARTICLE_MIN_DISTANCE))
             //     continue;
 
-            int16_t dx = p[j].x - p[i].x;
-            int16_t dy = p[j].y - p[i].y;
+
+            uint8_t ax = abs_diff_u8(p[j].x, p[i].x);
+            uint8_t ay = abs_diff_u8(p[j].y, p[i].y);
+
 
             // Do axis-aligned separation
-            uint8_t ax = dx > 0 ? dx : -dx;
-            uint8_t ay = dy > 0 ? dy : -dy;
+            // uint8_t ax = dx > 0 ? dx : -dx;
+            // uint8_t ay = dy > 0 ? dy : -dy;
 
             // Already separated along at least one axis
             if (ax >= SIM_PARTICLE_MIN_DISTANCE ||
                 ay >= SIM_PARTICLE_MIN_DISTANCE)
                 continue;
+
+            bool dx_negative = p[j].x < p[i].x;
+            bool dy_negative = p[j].y < p[i].y;
 
             uint8_t overlap;
             int8_t correction_i;
@@ -206,8 +211,12 @@ void simulation_step(void)
                 correction_i = overlap >> 1; // Half of the overlap
                 correction_j = overlap - correction_i;
 
-                correction_i = dx >= 0 ? -correction_i : correction_i;
-                correction_j = dx >= 0 ? correction_j : -correction_j;
+                // correction_i = dx < 0 ? correction_i : -correction_i;
+                // correction_j = dx < 0 ? -correction_j : correction_j;
+
+
+                correction_i = dx_negative ? correction_i : -correction_i;
+                correction_j = dx_negative ? -correction_j : correction_j;
 
                 // Use try_add because it prevents weird border behaviour
                 p[i].x = try_add_u8_s8(p[i].x, correction_i);
@@ -220,8 +229,11 @@ void simulation_step(void)
                 correction_i = overlap >> 1;
                 correction_j = overlap - correction_i;
 
-                correction_i = dy >= 0 ? -correction_i : correction_i;
-                correction_j = dy >= 0 ? correction_j : -correction_j;
+                // correction_i = dy < 0 ? correction_i : -correction_i;
+                // correction_j = dy < 0 ? -correction_j : correction_j;
+
+                correction_i = dy_negative ? correction_i : -correction_i;
+                correction_j = dy_negative ? -correction_j : correction_j;
 
                 // Use try_add because it prevents weird border behaviour
                 p[i].y = try_add_u8_s8(p[i].y, correction_i);
