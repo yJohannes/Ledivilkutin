@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "config.h"
+#include "sim_config.h"
 #include "vec2.h"
 
 #ifdef __cplusplus

@@ -9,10 +9,10 @@
 #include <imgui.h>
 
 #include <iostream>
-#include <sim/simulation.h>
-#include <sim/config.h>
+#include <sim/sim.h>
+#include <sim/sim_config.h>
 
-#include "config.h"
+#include "gui_config.h"
 #include "platform/window.h"
 #include "ui/simulation_view.h"
 

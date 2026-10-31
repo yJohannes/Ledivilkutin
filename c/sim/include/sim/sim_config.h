@@ -1,10 +1,10 @@
-/// @file config.
+/// @file sim_config.h
 /// @author Johannes Ylinen
 /// @brief Simulation parameters, constant values, etc.
 
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef SIM_CONFIG_H
+#define SIM_CONFIG_H
 
 #include <stdint.h>
 
@@ -98,4 +98,4 @@ extern sim_config cfg;
 
 #endif
 
-#endif // CONFIG_H
+#endif // SIM_CONFIG_H

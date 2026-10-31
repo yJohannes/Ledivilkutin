@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "config.h"
+#include "sim_config.h"
 #include "int_arithmetic.h"
 #include "vec2.h"
 
@@ -14,6 +14,7 @@ vec2u pp[SIM_PARTICLE_COUNT];
 vec2i a;
 vec2u16 cum_com;
 
+static vec2u prev_com;
 
 // Set timers
 static uint8_t accel_timer;
@@ -26,6 +27,12 @@ void simulation_init(void)
     accel_timer = SIM_ACCELERATION_INTERVAL - SIM_ACCELERATION_REMAINDER;
     com_timer = SIM_CENTER_OF_MASS_INTERVAL - SIM_CENTER_OF_MASS_REMAINDER;
     friction_timer = SIM_FRICTION_INTERVAL - SIM_FRICTION_REMAINDER;
+
+    prev_com = (vec2u)
+    {
+        128u,
+        128u
+    };
 
     for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -267,6 +274,9 @@ void simulation_step(void)
 
         uint8_t com_x = cum_com.x / SIM_PARTICLE_COUNT;
         uint8_t com_y = cum_com.y / SIM_PARTICLE_COUNT;
+
+        prev_com.x = com_x;
+        prev_com.y = com_y;
 
         // Move towards COM by one unit
 #ifdef SIM_USE_POINTER_ITERATION

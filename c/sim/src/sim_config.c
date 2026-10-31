@@ -1,6 +1,6 @@
 #ifdef SIM_USE_DYNAMIC
 
-#include "config.h"
+#include "sim_config.h"
 
 sim_config cfg = {
     .fps                        = SIM_DEFAULT_FPS,
