@@ -75,7 +75,7 @@ static bool mpu6050_set_accel_only_low_power(void)
 }
 
 
-bool mpu6050_test_connection(void)
+bool mpu6050_is_connected(void)
 {
     return i2c_check_ack(MPU6050_ADDR);
 }
@@ -83,7 +83,7 @@ bool mpu6050_test_connection(void)
 
 bool mpu6050_init(void)
 {
-    if (!mpu6050_test_connection())
+    if (!mpu6050_is_connected())
         return false;
 
     if (!mpu6050_check_identity())
