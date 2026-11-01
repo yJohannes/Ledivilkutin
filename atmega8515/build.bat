@@ -4,6 +4,8 @@ setlocal
 set "ROOT=%~dp0..\"
 set "BUILD=%ROOT%build\"
 set "OUT=%BUILD%atmega8515\"
+set "PROJECT_OUT=%ROOT%atmega8515\Ledivilkutin\Ledivilkutin\"
+
 
 mkdir "%BUILD%"
 if exist "%OUT%" rmdir /s /q "%OUT%"
@@ -30,6 +32,12 @@ copy "%ROOT%c\sim\src\sim.c" "%OUT%\"
 copy "%ROOT%c\sim\src\int_arithmetic.c" "%OUT%\"
 copy "%ROOT%c\sim\src\int_arithmetic.h" "%OUT%\"
 copy "%ROOT%c\sim\src\utils.h" "%OUT%\"
+
+
+REM Copy source and header files to the project directory
+@REM  if not exist "%PROJECT_OUT%" mkdir "%PROJECT_OUT%"
+@REM  copy "%OUT%\*.c" "%PROJECT_OUT%\"
+@REM  copy "%OUT%\*.h" "%PROJECT_OUT%\"
 
 echo.
 echo Firmware sources prepared in:
