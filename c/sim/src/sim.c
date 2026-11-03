@@ -314,7 +314,7 @@ void simulation_step(void)
 
 #ifdef SIM_USE_POINTER_ITERATION
         p_it = p;
-        vec2u* pp_it = pp;
+        pp_it = pp;
 #endif // SIM_USE_POINTER_ITERATION
         for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
         {
