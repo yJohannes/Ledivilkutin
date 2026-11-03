@@ -8,42 +8,6 @@
 #include "sim.h"
 #include "sim_config.h"
 
-#if 0
-// Use conventional screen coordinates (0, 0) = top-left corner
-#define PIN_ROW_0   PA3
-#define PIN_ROW_1   PA4
-#define PIN_ROW_2   PA5
-#define PIN_ROW_3   PA6
-#define PIN_ROW_4   PA7
-#define PIN_ROW_5   PE0
-#define PIN_ROW_6   PE1
-#define PIN_ROW_7   PE2
-#define PIN_ROW_8   PC7
-#define PIN_ROW_9   PC6
-#define PIN_ROW_10  PC5
-#define PIN_ROW_11  PC4
-#define PIN_ROW_12  PC3
-#define PIN_ROW_13  PC2
-#define PIN_ROW_14  PC1
-#define PIN_ROW_15  PC0
-
-#define PIN_COL_0   PA2
-#define PIN_COL_1   PD7
-#define PIN_COL_2   PA1
-#define PIN_COL_3   PD6
-#define PIN_COL_4   PA0
-#define PIN_COL_5   PD5
-#define PIN_COL_6   PB0
-#define PIN_COL_7   PD4
-#define PIN_COL_8   PB1
-#define PIN_COL_9   PD3
-#define PIN_COL_10  PB2
-#define PIN_COL_11  PD2
-#define PIN_COL_12  PB3
-#define PIN_COL_13  PD1
-#define PIN_COL_14  PB4
-#define PIN_COL_15  PD0
-#endif
 
 const LedPin ROW_PINS[LEDS_Y] = {
     {&PORTA, PA3}, // PIN_ROW_0
@@ -127,11 +91,11 @@ uint8_t get_brightness(uint8_t i)
 }
 
 
-uint8_t masks[4] = {
+uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
 
-uint8_t increments[4] = {
+uint8_t brightness_increments[4] = {
     0x01, 0x04, 0x10, 0x40
 };
 
@@ -142,10 +106,10 @@ void add_brightness_v4(uint8_t i)
     uint8_t *p = &brightness[i >> 2];
     uint8_t pos = i & 3;
 
-    uint8_t mask = masks[pos];
+    uint8_t mask = brightness_masks[pos];
 
     if ((*p & mask) != mask)
-        *p += increments[pos];
+        *p += brightness_increments[pos];
 }
 
 // void add_brightness(uint8_t i, uint8_t amount)
@@ -195,3 +159,41 @@ void update_brightness(void)
         process_particle(led_x, led_y);
     }
 }
+
+
+#if 0
+// Use conventional screen coordinates (0, 0) = top-left corner
+#define PIN_ROW_0   PA3
+#define PIN_ROW_1   PA4
+#define PIN_ROW_2   PA5
+#define PIN_ROW_3   PA6
+#define PIN_ROW_4   PA7
+#define PIN_ROW_5   PE0
+#define PIN_ROW_6   PE1
+#define PIN_ROW_7   PE2
+#define PIN_ROW_8   PC7
+#define PIN_ROW_9   PC6
+#define PIN_ROW_10  PC5
+#define PIN_ROW_11  PC4
+#define PIN_ROW_12  PC3
+#define PIN_ROW_13  PC2
+#define PIN_ROW_14  PC1
+#define PIN_ROW_15  PC0
+
+#define PIN_COL_0   PA2
+#define PIN_COL_1   PD7
+#define PIN_COL_2   PA1
+#define PIN_COL_3   PD6
+#define PIN_COL_4   PA0
+#define PIN_COL_5   PD5
+#define PIN_COL_6   PB0
+#define PIN_COL_7   PD4
+#define PIN_COL_8   PB1
+#define PIN_COL_9   PD3
+#define PIN_COL_10  PB2
+#define PIN_COL_11  PD2
+#define PIN_COL_12  PB3
+#define PIN_COL_13  PD1
+#define PIN_COL_14  PB4
+#define PIN_COL_15  PD0
+#endif
