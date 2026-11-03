@@ -15,6 +15,7 @@ target_compile_definitions(fluid_simulation
         SIM_COLLISIONS_ENABLED
         SIM_COM_ENABLED
         SIM_FRICTION_ENABLED
+        I2C_PLATFORM_ARDUINO
 )
 
 target_include_directories(fluid_simulation
