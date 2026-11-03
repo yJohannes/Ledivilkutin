@@ -1,6 +1,6 @@
 #include "i2c.h"
 #include "mpu6050.h"
-
+#include "mpu6050_regs.h"
 
 #define PIN_NX 3
 #define PIN_PX 5
