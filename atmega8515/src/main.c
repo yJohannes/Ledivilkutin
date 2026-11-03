@@ -88,7 +88,6 @@ void init_button_interrupt(void)
 }
 
 
-    0, 48, 96, 192
 void wait_for_button(void)
 {
     // Disable global interrupts to prevent an ISR from executing
@@ -163,6 +162,7 @@ bool debounce_button(void)
 
 // 0 is a dummy value.
 static const uint8_t brightness_ocr[] = {
+    0, 64, 99, 199
 };
 
 /// @brief Interrupt to update the LEDs.
