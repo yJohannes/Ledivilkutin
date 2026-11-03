@@ -9,7 +9,7 @@ if not exist "%BUILD%" mkdir "%BUILD%"
 if exist "%OUT%" rmdir /s /q "%OUT%"
 mkdir "%OUT%"
 
-copy "%~dp0test.c" "%OUT%"
+copy "%~dp0tests\test.c" "%OUT%"
 
 cd /d "%OUT%"
 
