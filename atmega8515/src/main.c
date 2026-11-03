@@ -1,4 +1,41 @@
 
+// (INT0) PD2 / External Interrupt Request 0
+ISR(INT0_vect)
+{
+    // Disable INT0 to prevent additional interrupts during debouncing
+    GICR &= ~(1 << INT0);
+
+    button_pressed = true;
+}
+
+
+void init_button_interrupt(void)
+{
+    // DDRD is the Data Direction Register D
+    // DDRD bit = 0 → Input
+    // DDRD bit = 1 → Output
+
+    // Set PD2 as input
+    DDRD &= ~(1 << PD2);
+
+    // Enable internal pull-up resistor
+    PORTD |= (1 << PD2);
+
+
+    // Configure INT0 for falling edge
+    // ISC01 = 1, ISC00 = 0 is Falling edge
+    MCUCR |= (1 << ISC01);
+    MCUCR &= ~(1 << ISC00);
+
+    // Clear any pending INT0 interrupt flag
+    GIFR = (1 << INTF0);
+
+    // Enable INT0
+    // p. 78
+    GICR |= (1 << INT0);
+}
+
+
 void init_led_timer(void)
 {
     TCCR0 = 0;      // Stop timer while configuring it
