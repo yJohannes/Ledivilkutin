@@ -2,9 +2,9 @@
 
 #include <cstdint>
 #include <algorithm>
-#include <cmath>
 #include <array>
 
+#include <cstring>
 #include <imgui.h>
 
 #include <sim/sim_config.h>
@@ -17,8 +17,92 @@ namespace ledv::gui
     namespace
     {
         constexpr std::array<float, 4> INTENSITY = {
-            0.0f, 0.15f, 0.4f, 0.9f
+            0.0f, 0.33f, 0.66f, 1.f
+            // 0.0f, 0.25f, 0.5f, 1.f
         };
+
+        uint8_t brightness[64];
+
+        uint8_t get_brightness(uint8_t i)
+        {
+            return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
+        }
+
+
+
+        uint8_t masks[4] = {
+            0x03, 0x0C, 0x30, 0xC0
+        };
+
+        uint8_t increments[4] = {
+            0x01, 0x04, 0x10, 0x40
+        };
+
+        void add_brightness_v4(uint8_t i)
+        {
+            uint8_t *p = &brightness[i >> 2];
+            uint8_t pos = i & 3;
+
+            uint8_t mask = masks[pos];
+
+            if ((*p & mask) != mask)
+                *p += increments[pos];
+        }
+
+        void add_brightness(uint8_t i, uint8_t amount)
+        {
+            uint8_t shift = (i & 3) << 1;
+            uint8_t mask = 3 << shift;
+
+            uint8_t value = (brightness[i >> 2] >> shift) & 3;
+
+            if (value < 3)
+            {
+                value += amount;
+                if (value > 3) value = 3;
+
+                brightness[i >> 2] =
+                    (brightness[i >> 2] & ~mask) | (value << shift);
+            }
+        }
+
+        void process_particle(uint8_t x, uint8_t y)
+        {
+            uint8_t i = y * 16 + x;
+
+            // Set max brightness
+            brightness[i >> 2] |= 3 << ((i & 3) << 1);
+
+            int add_amount = 1;
+
+            // if (x > 0)  add_brightness(i - 1, add_amount);
+            // if (x < 15) add_brightness(i + 1, add_amount);
+            // if (y > 0)  add_brightness(i - 16, add_amount);
+            // if (y < 15) add_brightness(i + 16, add_amount);
+
+            if (x > 0)  add_brightness_v4(i - 1);
+            if (x < 15) add_brightness_v4(i + 1);
+            if (y > 0)  add_brightness_v4(i - 16);
+            if (y < 15) add_brightness_v4(i + 16);
+        }
+
+
+        
+        void update_brightness(void)
+        {
+            // Clear frame buffer
+            std::memset(brightness, 0, sizeof(brightness));
+
+            for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
+            {
+                uint8_t led_x = p[i].x >> 4;
+                uint8_t led_y = p[i].y >> 4;
+
+                process_particle(led_x, led_y);
+            }
+        }
+
+
     }
 
     void SimulationView::Render()
@@ -49,22 +133,22 @@ namespace ledv::gui
             // Build the LED intensity map.
             std::array<int, LEDS_X * LEDS_Y> intensity_map{};
 
+            std::memset(brightness, 0, sizeof(brightness));
+
             for (int i = 0; i < SIM_PARTICLE_COUNT; ++i)
             {
-                // Particle coordinates are fixed-point values in [0, 256).
-                const int led_x = static_cast<int>(p[i].x) >> 4;
-                const int led_y = static_cast<int>(p[i].y) >> 4;
+                // Particle coordinates are fixed-point values in [0, 255].
+                const uint8_t led_x = p[i].x >> 4;
+                const uint8_t led_y = p[i].y >> 4;
 
-                if (led_x < 0 || led_x >= LEDS_X ||
-                    led_y < 0 || led_y >= LEDS_Y)
-                {
-                    continue;
-                }
+                process_particle(led_x, led_y);
 
                 const int idx = LEDS_X * led_y + led_x;
 
                 // Particle cell.
                 intensity_map[idx] = 3;
+
+                const int add_val = 1;
 
                 // Right.
                 if (led_x + 1 < LEDS_X)
@@ -95,41 +179,40 @@ namespace ledv::gui
                 }
             }
 
+            constexpr float LED_SCALE = 0.35f;
+
             // Draw the LED grid.
             for (int y = 0; y < LEDS_Y; ++y)
             {
                 for (int x = 0; x < LEDS_X; ++x)
                 {
-                    const ImVec2 min(
+                    const ImVec2 cell_min(
                         origin.x + x * cell_size,
                         origin.y + y * cell_size
                     );
 
+                    const float square_size = cell_size * LED_SCALE;
+                    const float offset = (cell_size - square_size) * 0.5f;
+
+                    const ImVec2 min(
+                        cell_min.x + offset,
+                        cell_min.y + offset
+                    );
+
                     const ImVec2 max(
-                        min.x + cell_size,
-                        min.y + cell_size
+                        min.x + square_size,
+                        min.y + square_size
                     );
 
                     const int idx = y * LEDS_X + x;
+                    // int intensity_level = intensity_map[idx];
+                    int intensity_level = get_brightness(idx);
 
-                    int intensity_level = intensity_map[idx];
+                    ImU32 cell_color = intensity_level == 0
+                        ? gui_cfg.GetBgColor(gui_cfg.bg_color_intensity)
+                        : gui_cfg.GetColor(INTENSITY[intensity_level]);
 
-                    ImU32 cell_color = 0;
-
-                    if (intensity_level == 0)
-                    {
-                        cell_color = gui_cfg.GetBgColor(gui_cfg.bg_color_intensity);
-                    }
-                    else
-                    {
-                        cell_color = gui_cfg.GetColor(INTENSITY[intensity_level]);
-                    }
-
-                    draw_list->AddRectFilled(
-                        min,
-                        max,
-                        cell_color
-                    );
+                    draw_list->AddRectFilled(min, max, cell_color);
 
                     draw_list->AddRect(
                         min,
@@ -138,6 +221,7 @@ namespace ledv::gui
                     );
                 }
             }
+
 
             // Draw particles.
             if (gui_cfg.render_particles)
