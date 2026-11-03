@@ -26,7 +26,12 @@ extern uint8_t brightness[64];
 
 
 void init_led_pins(void);
-uint8_t get_brightness(uint8_t i);
+
+static inline uint8_t get_brightness(uint8_t i)
+{
+    return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
+}
+
 void add_brightness(uint8_t i);
 void add_brightness_v4(uint8_t i);
 void process_particle(uint8_t x, uint8_t y);

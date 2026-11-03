@@ -85,12 +85,6 @@ void init_led_pins(void)
 }
 
 
-uint8_t get_brightness(uint8_t i)
-{
-    return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
-}
-
-
 uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
