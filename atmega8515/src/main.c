@@ -1,3 +1,55 @@
+#include <assert.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
+#include <util/delay.h>
+
+#include <stdbool.h>
+#include <stdint.h>
+
+
+// typedef struct {
+//     uint8_t row[48];   // [0..15] PORTA  [16..31] PORTC  [32..47] PORTE   active = 1
+//     uint8_t col[48];   // [0..15] PORTA  [16..31] PORTB  [32..47] PORTD   active = 0
+// } tbl_t;
+
+// static tbl_t T = {     // non-const -> SRAM (.data), 96 bytes, no alignment needed
+//     .row = {
+//         0x08,0x10,0x20,0x40,0x80,0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
+//         0,0,0,0,0,0,0,0,0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
+//         0,0,0,0,0,0x01,0x02,0x04,0,0,0,0,0,0,0,0 },                      // PORTE
+//     .col = {
+//         0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
+//         0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
+//         0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
+//         0x1D,0x1F,0x1B,0x1F,0x17,0x1F,0x0F,0x1F,                          // PORTB (bits 0-4)
+//         0xFF,0x7F,0xFF,0xBF,0xFF,0xDF,0xFF,0xEF,
+//         0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE }                         // PORTD
+// };
+#include "i2c.h"
+#include "mpu6050.h"
+#include "sim.h"
+#include "leds.h"
+#include "sim_config.h"
+
+
+#define DEBOUNCE_DELAY_MS 25
+
+// https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
+// p. 93 Clock Select bits
+#define LED_TIMER_PRESCALER 64  // 8, 64, 256, 1024
+#define OCR1A_PS1024_20_HZ 389 // (8 × 10^(6))/(1024 × 20) − 1 = 389.625
+#define OCR1A_PS1024_19_HZ 410 // 8 000 000 / (1 024 × 19) − 1 = 410.184
+
+
+volatile bool button_pressed = false;
+volatile bool simulate_step = false;
+
+volatile uint8_t current_led = 0;
+
+bool running = false;
+
+
 
 // (INT0) PD2 / External Interrupt Request 0
 ISR(INT0_vect)
@@ -304,3 +356,18 @@ int main()
     }
 }
 
+
+
+// // Timer 0
+// #define TIMER0_PRESCALER_1    (1 << CS00)
+// #define TIMER0_PRESCALER_8    (1 << CS01)
+// #define TIMER0_PRESCALER_64   ((1 << CS01) | (1 << CS00))
+// #define TIMER0_PRESCALER_256  (1 << CS02)
+// #define TIMER0_PRESCALER_1024 ((1 << CS02) | (1 << CS00))
+
+// // Timer 1
+// #define TIMER1_PRESCALER_1    (1 << CS10)
+// #define TIMER1_PRESCALER_8    (1 << CS11)
+// #define TIMER1_PRESCALER_64   ((1 << CS11) | (1 << CS10))
+// #define TIMER1_PRESCALER_256  (1 << CS12)
+// #define TIMER1_PRESCALER_1024 ((1 << CS12) | (1 << CS10))
