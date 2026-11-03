@@ -87,7 +87,7 @@ namespace ledv::gui
         }
 
 
-        
+
         void update_brightness(void)
         {
             // Clear frame buffer
@@ -179,6 +179,17 @@ namespace ledv::gui
                 }
             }
 
+            std::array<int, 4> brightness_counts{};
+
+            // Count squares at each brightness level.
+            for (int i = 0; i < LEDS_X * LEDS_Y; ++i)
+            {
+                const int brightness_level = get_brightness(i);
+
+                if (brightness_level >= 0 && brightness_level <= 3)
+                    brightness_counts[brightness_level]++;
+            }
+
             constexpr float LED_SCALE = 0.35f;
 
             // Draw the LED grid.
@@ -252,6 +263,32 @@ namespace ledv::gui
                 }
             }
 
+            {
+                const int total_active_squares =
+                    LEDS_X * LEDS_Y - brightness_counts[0];
+
+                ImGui::Text("Brightness distribution:");
+
+                ImGui::Text(
+                    "Total active squares: %d",
+                    total_active_squares
+                );
+
+                for (int i = 0; i <= 3; ++i)
+                {
+                    const float normalized = total_active_squares > 0
+                        ? static_cast<float>(brightness_counts[i]) / total_active_squares
+                        : 0.0f;
+
+                    ImGui::Text(
+                        "Brightness %d: %03d squares | %.4f (%.2f%%)",
+                        i,
+                        brightness_counts[i],
+                        normalized,
+                        normalized * 100.0f
+                    );
+                }
+            }
 
             // Center of mass and effective radius.
             // Assumes `sim` is the C++ simulation instance.
