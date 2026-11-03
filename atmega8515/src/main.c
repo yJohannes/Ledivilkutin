@@ -88,67 +88,7 @@ void init_button_interrupt(void)
 }
 
 
-void init_led_timer(void)
-{
-    TCCR0 = 0;      // Stop timer while configuring it
-    TCNT0 = 0;      // Reset counter
-
-    OCR0 = 48;
-
-    TCCR0 = (1 << WGM01)        // CTC mode
-          | (1 << CS02)
-          | (1 << CS00);        // Prescaler: 1024
-
-    TIMSK |= (1 << OCIE0);      // Enable Timer0 compare-match interrupt
-}
-
-
-// Quadratic progression
-static const uint8_t brightness_ocr[] = {
     0, 48, 96, 192
-};
-
-/// @brief Interrupt to update the LEDs.
-ISR(TIMER0_COMP_vect)
-{
-    uint8_t row = current_led >> 4;
-    uint8_t col = current_led & 0x0F;
-
-    // Signal   Inactive  Active
-    // Rows     LOW       HIGH
-    // Columns 	HIGH      LOW
-
-    // Set prev row LOW
-    *ROW_PINS[row].port &= ~ROW_PINS[row].mask;
-
-    // Set prev col HIGH
-    *COL_PINS[col].port |= COL_PINS[col].mask;
-
-
-    uint8_t brightness;
-
-    do
-    {
-        brightness = get_brightness(++current_led);
-    }
-    while (brightness == 0);
-
-    row = current_led >> 4;
-    col = current_led & 0x0F;
-
-    // Set new row HIGH
-    *ROW_PINS[row].port |= ROW_PINS[row].mask;
-
-    // Set new col LOW
-    *COL_PINS[col].port &= ~COL_PINS[col].mask;
-
-    // Should not cause flicker or weird stuff since
-    // There's no way there's enough time for the timer to
-    // pass over the OCR0 value causing a wait for overflow + count.
-    OCR0 = brightness_ocr[brightness];
-}
-
-
 void wait_for_button(void)
 {
     // Disable global interrupts to prevent an ISR from executing
@@ -218,6 +158,75 @@ bool debounce_button(void)
     sei();
 
     return valid_press;
+}
+
+
+// 0 is a dummy value.
+static const uint8_t brightness_ocr[] = {
+};
+
+/// @brief Interrupt to update the LEDs.
+ISR(TIMER0_COMP_vect)
+{
+    uint8_t led = current_led; // volatile would make compiler have to reread.
+    uint8_t row = led >> 4;
+    uint8_t col = led & 0x0F;
+
+    // Signal   Inactive  Active
+    // Rows     LOW       HIGH
+    // Columns 	HIGH      LOW
+
+    // Set prev row LOW
+    *ROW_PINS[row].port &= ~ROW_PINS[row].mask;
+
+    // Set prev col HIGH
+    *COL_PINS[col].port |= COL_PINS[col].mask;
+
+
+    uint8_t brightness;
+
+    // do
+    // {
+    //     brightness = get_brightness(++current_led);
+    // }
+    // while (brightness == 0);
+
+    // TODO: ensure this doesn't take too long
+    do
+    {
+        // led wraps around perfectly since LED count is 256.
+        brightness = get_brightness(++led);
+    }
+    while (brightness == 0);
+
+    row = led >> 4;
+    col = led & 0x0F;
+
+    // Set new row HIGH
+    *ROW_PINS[row].port |= ROW_PINS[row].mask;
+
+    // Set new col LOW
+    *COL_PINS[col].port &= ~COL_PINS[col].mask;
+
+    // Should not cause flicker or weird stuff since
+    // There's no way there's enough time for the timer to
+    // pass over the OCR0 value causing a wait for overflow + count.
+    OCR0 = brightness_ocr[brightness];
+}
+
+
+void init_led_timer(void)
+{
+    TCCR0 = 0;      // Stop timer while configuring it
+    TCNT0 = 0;      // Reset counter
+
+    OCR0 = 48;
+
+    TCCR0 = (1 << WGM01)        // CTC mode
+          | (1 << CS02)
+          | (1 << CS00);        // Prescaler: 1024
+
+    TIMSK |= (1 << OCIE0);      // Enable Timer0 compare-match interrupt
 }
 
 
