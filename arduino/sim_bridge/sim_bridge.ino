@@ -74,6 +74,7 @@ void setup()
   Serial.println("Initialization done.");
 }
 
+
 void loop()
 {
   mpu6050_read_accel(&ax, &ay, &az);
