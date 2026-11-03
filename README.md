@@ -2,6 +2,16 @@
 
 ## Logs
 
+2/11/2026
+- Struggled a lot with efficient LED PWM. Still finished it with hopefully enough optimizations.
+  Lots of assumptions, some quite aggressive, were made and I hope the performance doesn't sway.
+- Finished the microcontroller code.
+
+1/11/2026
+- Made good progress with the microcontroller code.
+- Wrote the main loop for the most part
+- Added button interrupt
+
 31/10/2026
 - Prepare code for programming the microcontroller.
 - Performance testing and optimizations.
