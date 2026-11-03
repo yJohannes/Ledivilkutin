@@ -1,5 +1,4 @@
 #include "i2c.h"
-#include "i2c_config.h"
 
 #include <stdint.h>
 #include <stdbool.h>
