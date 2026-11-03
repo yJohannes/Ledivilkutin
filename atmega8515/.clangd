@@ -4,7 +4,7 @@ CompileFlags:
   Add:
     - -x
     - c
-    - -I../build/atmega8515
+    - -I../../build/atmega8515
     - --target=avr
     - -mmcu=atmega8515
     - -isystem
