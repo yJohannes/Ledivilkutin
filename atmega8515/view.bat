@@ -23,6 +23,8 @@ if errorlevel 1 exit /b 1
 echo Assembly listing generated: firmware.lst
 
 REM Open the listing in Notepad
-notepad firmware.lst
+@REM  notepad firmware.lst
+start "" notepad.exe "%OUT%\firmware.lst"
+
 
 endlocal
