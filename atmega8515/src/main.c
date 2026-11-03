@@ -37,7 +37,6 @@
 
 // https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
 // p. 93 Clock Select bits
-#define LED_TIMER_PRESCALER 64  // 8, 64, 256, 1024
 #define OCR1A_PS1024_20_HZ 389 // (8 × 10^(6))/(1024 × 20) − 1 = 389.625
 #define OCR1A_PS1024_19_HZ 410 // 8 000 000 / (1 024 × 19) − 1 = 410.184
 
@@ -222,9 +221,9 @@ void init_led_timer(void)
 
     OCR0 = 48;
 
+    // https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
     TCCR0 = (1 << WGM01)        // CTC mode
-          | (1 << CS02)
-          | (1 << CS00);        // Prescaler: 1024
+          | (1 << CS01);        // Prescaler: 8
 
     TIMSK |= (1 << OCIE0);      // Enable Timer0 compare-match interrupt
 }
