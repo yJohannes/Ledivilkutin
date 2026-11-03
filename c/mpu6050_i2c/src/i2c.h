@@ -17,6 +17,8 @@
 #define I2C_ACK   true
 #define I2C_NACK  false
 
+#define I2C_HALF_CLOCK_US 2
+
 
 #ifdef __cplusplus
 extern "C" {
