@@ -1,4 +1,40 @@
 
+void wait_for_button(void)
+{
+    // Disable global interrupts to prevent an ISR from executing
+    // while we check the button flag and prepare to sleep.
+    cli();
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+    while (!button_pressed)
+    {
+        // Enable the sleep mechanism (does not sleep yet).
+        sleep_enable();
+
+        // Re-enable interrupts.
+        // AVR guarantees that the instruction immediately following
+        // sei() executes before any pending interrupt is serviced.
+        sei();
+
+        // Enter the selected sleep mode (Power-down).
+        // If INT0 is pending, the MCU enters sleep and immediately
+        // wakes up to execute the interrupt handler.
+        sleep_cpu();
+
+        // Execution resumes here after waking up.
+        // Disable the sleep mechanism.
+        sleep_disable();
+
+        // Disable interrupts again before checking button_pressed.
+        cli();
+    }
+
+    // Button was pressed. Re-enable interrupts before returning.
+    sei();
+}
+
+
 /// @returns true if the button remained pressed after the debounce interval;
 ///          false if the interrupt was caused by contact bounce.
 bool debounce_button(void)
