@@ -16,9 +16,9 @@ struct GuiConfig
 
     float bg_base_color_float3[3] =
     {
-        4.f / 255.f,
-        63.f / 255.f,
-        7.f / 255.f
+        70.f / 255.f,
+        68.f / 255.f,
+        64.f / 255.f
     };
 
     float color_intensity = 0.85;
