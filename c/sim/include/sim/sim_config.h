@@ -31,16 +31,16 @@
 #define SIM_PARTICLE_COUNT              SIM_DEFAULT_PARTICLE_COUNT
 
 // Tweakable parameters
-#define SIM_DEFAULT_FPS                         20u
+#define SIM_DEFAULT_FPS                         19u
 #define SIM_DEFAULT_PARTICLE_RADIUS             32u
 #define SIM_DEFAULT_PARTICLE_MIN_DISTANCE       16   // Distance before particles are pushed apart
-#define SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT   15   // Maximum dx in Verlet integration
+#define SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT   16   // Maximum dx in Verlet integration
 #define SIM_DEFAULT_ACCELERATION_INTERVAL       3u
-#define SIM_DEFAULT_ACCELERATION_REMAINDER      0u
+#define SIM_DEFAULT_ACCELERATION_REMAINDER      1u
 #define SIM_DEFAULT_CENTER_OF_MASS_INTERVAL     3u
 #define SIM_DEFAULT_CENTER_OF_MASS_REMAINDER    0u
-#define SIM_DEFAULT_FRICTION_INTERVAL           6u
-#define SIM_DEFAULT_FRICTION_REMAINDER          5u
+#define SIM_DEFAULT_FRICTION_INTERVAL           5u
+#define SIM_DEFAULT_FRICTION_REMAINDER          3u
 
 #ifndef SIM_USE_DYNAMIC
 
