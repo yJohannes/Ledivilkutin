@@ -1,16 +1,10 @@
 const int LED_PIN = 13;
 
-const uint32_t N = 164;
-const float F = 50; // Keep low for performance
-const float T = 1.0 / F;
-const float T_ON = T / N;
-const float T_OFF = T - T_ON;
+const uint32_t N_LED = 164;
 
-// const uint32_t T_ON_US = (uint32_t)(T_ON * 1000000UL);
-// const uint32_t T_OFF_US = (uint32_t)(T_OFF * 1000000.0f);
-
-uint32_t T_ON_US = 132;
-uint32_t T_OFF_US = 132*(N-1); // Average of 66, 132, 198
+float weights[3] = {0.27, 0.13, 0.6};
+uint8_t duration[3] = {64, 99, 199}; 
+uint32_t average_duration = 0;
 
 
 void preciseDelay(uint32_t us)
@@ -19,19 +13,20 @@ void preciseDelay(uint32_t us)
     delayMicroseconds(us % 1000);
 }
 
+
 void setup()
 {
     pinMode(LED_PIN, OUTPUT);
+
+    // Calculate weighted average from the distribution of LED brightnesses.
+    float sum = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        sum += duration[i] * weights[i];
+    }
+
+    average_duration = sum;
 }
-
-// void loop()
-// {
-//     digitalWrite(LED_PIN, HIGH);
-//     preciseDelay(T_ON_US);
-
-//     digitalWrite(LED_PIN, LOW);
-//     preciseDelay(T_OFF_US);
-// }
 
 
 void loop()
@@ -45,14 +40,8 @@ void loop()
         phase = (phase + 1) % 3;
     }
 
-    // const uint32_t T_ON_US = (phase == 0) ? 198 :
-    //                          (phase == 1) ? 132 :
-    //                                         66;
-    T_OFF_US = 115*(N-1); // Average of 49, 99, 198
-
-    T_ON_US = (phase == 0) ? 198 :
-                (phase == 1) ? 99 :
-                            49;
+    uint32_t T_OFF_US = average_duration * (N_LED - 1);
+    uint32_t T_ON_US = duration[2 - phase]; // Reverse order looks like a more natural progression
 
     digitalWrite(LED_PIN, HIGH);
     preciseDelay(T_ON_US);
