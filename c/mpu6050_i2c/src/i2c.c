@@ -1,16 +1,17 @@
 #include "i2c.h"
-#include "i2c_config.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h> // NULL
 
 
+#define I2C_PLATFORM_ARDUINO
+
 // Include platform specific implementation source here
-#ifdef I2C_PLATFORM_ARDUINO
-    #include "i2c_arduino.c"
-#elif defined(I2C_PLATFORM_AVR)
+#ifdef I2C_PLATFORM_AVR
     #include "i2c_avr.c"
+#elif defined(I2C_PLATFORM_ARDUINO)
+    #include "i2c_arduino.c"
 #else
     #error "No supported I2C backend selected"
 #endif
