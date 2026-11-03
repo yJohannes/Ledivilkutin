@@ -2,6 +2,8 @@ CompileFlags:
   CompilationDatabase: ../build/atmega8515
 
   Add:
+    - -x
+    - c
     - -I../build/atmega8515
     - --target=avr
     - -mmcu=atmega8515
@@ -20,6 +22,7 @@ Diagnostics:
       - bugprone-easily-swappable-parameters
       - cppcoreguidelines-avoid-c-arrays
       - cppcoreguidelines-avoid-magic-numbers
+      - readability-magic-numbers
       - cppcoreguidelines-avoid-non-const-global-variables
       - cppcoreguidelines-init-variables
       - cppcoreguidelines-macro-usage
@@ -28,6 +31,7 @@ Diagnostics:
       - cppcoreguidelines-pro-type-vararg
       - modernize-use-trailing-return-type
       - readability-identifier-length
+      - readability-magic-numbers
       - readability-avoid-nested-conditional-operator
       - readability-braces-around-statements
       - readability-enum-initial-value
