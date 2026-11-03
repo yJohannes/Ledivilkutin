@@ -1,8 +1,5 @@
-#include "i2c_config.h"
-
 #ifdef I2C_PLATFORM_ARDUINO
 
-#include "i2c.h"
 
 #include <stdint.h>
 #include <stdbool.h>
