@@ -64,6 +64,7 @@ Ignoring the first two measurements:
 
 Slight fluctuations around the budget. Very promising.
 
+<!--
 18242
 678780
 1033464
@@ -83,7 +84,7 @@ Slight fluctuations around the budget. Very promising.
 6876725
 7296952
 7720937
-
+-->
 
 ### Results with `simulation_step` commented out excluding MPU6050 and I2C
 
@@ -101,7 +102,7 @@ The differences between consecutive measurements are:
 
 These results indicate timers are working as intended.
 
-
+<!--
 18242
 438620
 859703
@@ -122,6 +123,7 @@ These results indicate timers are working as intended.
 7172444
 7593308
 8014172
+ -->
 
 ## Memory usage
 
