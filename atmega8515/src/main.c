@@ -35,6 +35,32 @@ bool debounce_button(void)
 }
 
 
+ISR(TIMER1_COMPA_vect)
+{
+    simulate_step = true;
+}
+
+void init_sim_timer(void)
+{
+
+    // Stop Timer1 while configuring
+    TCCR1B = 0;
+    TCCR1A = 0;
+
+    // CTC mode (TOP = OCR1A)
+    TCCR1B |= (1 << WGM12);
+
+    // Compare value
+    OCR1A = OCR1A_PS1024_19_HZ;
+
+    // Enable Timer1 Compare Match A interrupt
+    TIMSK |= (1 << OCIE1A);
+
+    // Prescaler = 1024, start timer
+    TCCR1B |= (1 << CS12) | (1 << CS10);
+}
+
+
 int main()
 {
     init_button_interrupt();
