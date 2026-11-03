@@ -1,5 +1,3 @@
-#include "i2c_config.h"
-
 #ifdef I2C_PLATFORM_AVR
 
 #include "i2c.h"
