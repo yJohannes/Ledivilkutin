@@ -432,6 +432,9 @@ static void ledivilkutin_update_acceleration(void)
         // https://ww1.microchip.com/downloads/en/DeviceDoc/AVR-Instruction-Set-Manual-DS40002198A.pdf#_OPENTOPIC_TOC_PROCESSING_d138e17156
         a.x >>= 3;
         a.y >>= 3;
+
+        a.x = -a.x;
+        a.y = -a.y;
     }
     else
     {
