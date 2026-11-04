@@ -53,7 +53,7 @@ namespace ledv::gui
                     // physical Arduino board.
                     // Could possibly just bitshift for 2's complement?
                     a.x = (int8_t)(-ax / 256) >> 3; // divide by 4 => [-32, 31]
-                    a.y = (int8_t)(ay / 256)  >> 3;
+                    a.y = (int8_t)(-ay / 256)  >> 3;
 
                     std::cout << std::format("a_raw:    [{:>6},{:>6}]", ax, ay)
                               << '\n'
