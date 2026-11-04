@@ -421,8 +421,8 @@ static void ledivilkutin_update_acceleration(void)
         // handle it.
         if (!mpu6050_read_accel_xy_i8(&a.x, &a.y))
         {
-            a.x = 0u;
-            a.y = 0u;
+            a.x = 0;
+            a.y = 0;
         }
 
         // Divide by 4 to map acceleration to [-32, 31]
@@ -432,8 +432,8 @@ static void ledivilkutin_update_acceleration(void)
     }
     else
     {
-        a.x = 0u;
-        a.y = 0u;
+        a.x = 0;
+        a.y = 0;
     }
 }
 
