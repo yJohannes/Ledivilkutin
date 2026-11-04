@@ -27,9 +27,9 @@ static inline int8_t try_add_s8(int8_t x, int8_t y)
 }
 
 
-static inline uint8_t abs_diff_u8(uint8_t a, uint8_t b)
+static inline uint8_t abs_diff_u8(uint8_t x, uint8_t y)
 {
-    return a > b ? a - b : b - a;
+    return x > y ? x - y : y - x;
 }
 
 
