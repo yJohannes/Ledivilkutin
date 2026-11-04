@@ -160,8 +160,11 @@ void process_particle(uint8_t x, uint8_t y)
 
 void update_brightness(void)
 {
-    // Clear frame buffer
-    memset(brightness, 0, sizeof(brightness));
+    // Prevents infinite loop for the LED timer ISR.
+    brightness[0] = 1u;
+
+    // Clear the remaining framebuffer.
+    memset(&brightness[1], 0, sizeof(brightness) - 1);
 
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -170,4 +173,8 @@ void update_brightness(void)
 
         process_particle(led_x, led_y);
     }
+
+    // Remove sentinel contribution.
+    if ((brightness[0] & 0x03u) < 3u)
+        brightness[0] -= 1u;  // Guaranteed to be at least 1 so this is ok
 }
