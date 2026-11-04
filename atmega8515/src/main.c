@@ -425,10 +425,13 @@ static void ledivilkutin_update_acceleration(void)
             a.y = 0;
         }
 
-        // Divide by 4 to map acceleration to [-32, 31]
+
+
+        // // Divide by 4 to map acceleration to [-32, 31]
+        // Divide by 8 to map acceleration to [-16, 15]
         // https://ww1.microchip.com/downloads/en/DeviceDoc/AVR-Instruction-Set-Manual-DS40002198A.pdf#_OPENTOPIC_TOC_PROCESSING_d138e17156
-        a.x >>= 2;
-        a.y >>= 2;
+        a.x >>= 3;
+        a.y >>= 3;
     }
     else
     {
