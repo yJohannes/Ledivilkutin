@@ -1,88 +1,54 @@
 #include "leds.h"
 
 #include <avr/io.h>
+#include <avr/sfr_defs.h>
 
 #include <stdint.h>
 #include <string.h>
 
-const LedPin ROW_PINS[LEDS_Y] = {
-    {&PORTA, PA3}, // PIN_ROW_0
-    {&PORTA, PA4}, // PIN_ROW_1
-    {&PORTA, PA5}, // PIN_ROW_2
-    {&PORTA, PA6}, // PIN_ROW_3
-    {&PORTA, PA7}, // PIN_ROW_4
-    {&PORTD, PB5}, // PIN_ROW_5
-    {&PORTD, PB6}, // PIN_ROW_6
-    {&PORTD, PB7}, // PIN_ROW_7
-    {&PORTC, PC7}, // PIN_ROW_8
-    {&PORTC, PC6}, // PIN_ROW_9
-    {&PORTC, PC5}, // PIN_ROW_10
-    {&PORTC, PC4}, // PIN_ROW_11
-    {&PORTC, PC3}, // PIN_ROW_12
-    {&PORTC, PC2}, // PIN_ROW_13
-    {&PORTC, PC1}, // PIN_ROW_14
-    {&PORTC, PC0}  // PIN_ROW_15
-};
-
-const LedPin COL_PINS[LEDS_X] = {
-    {&PORTA, PA2}, // PIN_COL_0
-    {&PORTD, PD7}, // PIN_COL_1
-    {&PORTA, PA1}, // PIN_COL_2
-    {&PORTD, PD6}, // PIN_COL_3
-    {&PORTA, PA0}, // PIN_COL_4
-    {&PORTD, PD5}, // PIN_COL_5
-    {&PORTB, PB0}, // PIN_COL_6
-    {&PORTD, PD4}, // PIN_COL_7
-    {&PORTB, PB1}, // PIN_COL_8
-    {&PORTD, PD3}, // PIN_COL_9
-    {&PORTB, PB2}, // PIN_COL_10
-    {&PORTD, PD2}, // PIN_COL_11
-    {&PORTB, PB3}, // PIN_COL_12
-    {&PORTD, PD1}, // PIN_COL_13
-    {&PORTB, PB4}, // PIN_COL_14
-    {&PORTD, PD0}  // PIN_COL_15
-};
-
-// const uint8_t row_pins[16] = {
-//     PIN_ID(PORT_A, PA3),
-//     PIN_ID(PORT_A, PA4),
-//     PIN_ID(PORT_A, PA5),
-//     PIN_ID(PORT_A, PA6),
-//     PIN_ID(PORT_A, PA7),
-//     PIN_ID(PORT_E, PE0),
-//     PIN_ID(PORT_E, PE1),
-//     PIN_ID(PORT_E, PE2),
-//     PIN_ID(PORT_C, PC7),
-//     PIN_ID(PORT_C, PC6),
-//     PIN_ID(PORT_C, PC5),
-//     PIN_ID(PORT_C, PC4),
-//     PIN_ID(PORT_C, PC3),
-//     PIN_ID(PORT_C, PC2),
-//     PIN_ID(PORT_C, PC1),
-//     PIN_ID(PORT_C, PC0)
-// };
-
-// const uint8_t col_pins[16] = {
-//     PIN_ID(PORT_A, PA2),
-//     PIN_ID(PORT_D, PD7),
-//     PIN_ID(PORT_A, PA1),
-//     PIN_ID(PORT_D, PD6),
-//     PIN_ID(PORT_A, PA0),
-//     PIN_ID(PORT_D, PD5),
-//     PIN_ID(PORT_B, PB0),
-//     PIN_ID(PORT_D, PD4),
-//     PIN_ID(PORT_B, PB1),
-//     PIN_ID(PORT_D, PD3),
-//     PIN_ID(PORT_B, PB2),
-//     PIN_ID(PORT_D, PD2),
-//     PIN_ID(PORT_B, PB3),
-//     PIN_ID(PORT_D, PD1),
-//     PIN_ID(PORT_B, PB4),
-//     PIN_ID(PORT_D, PD0)
-// };
+#include "sim.h"
+#include "sim_config.h"
 
 
 uint8_t brightness[64];
+
+const LedPin ROW_PINS[LEDS_Y] = {
+    {&PORTA, _BV(PA3)}, // PIN_ROW_0
+    {&PORTA, _BV(PA4)}, // PIN_ROW_1
+    {&PORTA, _BV(PA5)}, // PIN_ROW_2
+    {&PORTA, _BV(PA6)}, // PIN_ROW_3
+    {&PORTA, _BV(PA7)}, // PIN_ROW_4
+    {&PORTB, _BV(PB5)}, // PIN_ROW_5
+    {&PORTB, _BV(PB6)}, // PIN_ROW_6
+    {&PORTB, _BV(PB7)}, // PIN_ROW_7
+    {&PORTC, _BV(PC7)}, // PIN_ROW_8
+    {&PORTC, _BV(PC6)}, // PIN_ROW_9
+    {&PORTC, _BV(PC5)}, // PIN_ROW_10
+    {&PORTC, _BV(PC4)}, // PIN_ROW_11
+    {&PORTC, _BV(PC3)}, // PIN_ROW_12
+    {&PORTC, _BV(PC2)}, // PIN_ROW_13
+    {&PORTC, _BV(PC1)}, // PIN_ROW_14
+    {&PORTC, _BV(PC0)}  // PIN_ROW_15
+};
+
+const LedPin COL_PINS[LEDS_X] = {
+    {&PORTA, _BV(PA2)}, // PIN_COL_0
+    {&PORTD, _BV(PD7)}, // PIN_COL_1
+    {&PORTA, _BV(PA1)}, // PIN_COL_2
+    {&PORTD, _BV(PD6)}, // PIN_COL_3
+    {&PORTA, _BV(PA0)}, // PIN_COL_4
+    {&PORTD, _BV(PD5)}, // PIN_COL_5
+    {&PORTB, _BV(PB0)}, // PIN_COL_6
+    {&PORTD, _BV(PD4)}, // PIN_COL_7
+    {&PORTB, _BV(PB1)}, // PIN_COL_8
+    {&PORTD, _BV(PD3)}, // PIN_COL_9
+    {&PORTB, _BV(PB2)}, // PIN_COL_10
+    {&PORTD, _BV(PD2)}, // PIN_COL_11
+    {&PORTB, _BV(PB3)}, // PIN_COL_12
+    {&PORTD, _BV(PD1)}, // PIN_COL_13
+    {&PORTB, _BV(PB4)}, // PIN_COL_14
+    {&PORTD, _BV(PD0)}  // PIN_COL_15
+};
 
 
 void init_led_pins(void)
@@ -94,52 +60,65 @@ void init_led_pins(void)
     // Rows     LOW       HIGH
     // Columns 	HIGH      LOW
 
-    // Initial output states
+    // Set initial inactive output states:
     // Rows = HIGH, cols = LOW
-    PORTA = 0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
-    PORTB &= 0b00011111; // PB0-4 columns HIGH
-    PORTC = 0b00000000; // PC0-7 rows LOW
-    PORTD = 0b11111111; // PD0-7 columns HIGH
 
-    // 3 4 5 6 7 2 1 0
-    DDRA = 0b11111111; // All PORT A pins are outputs
+    PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
+    PORTB = (PORTB & ~LED_MASK_B) | COL_MASK_B;
+    PORTC = (PORTC & ~LED_MASK_C) | COL_MASK_C;
+    PORTD = (PORTD & ~LED_MASK_D) | COL_MASK_D;
 
-    // 0 1 2 3 4
-    DDRB |= 0b11101111; // PB0-PB4 outputs
+    // Configure LED pins as outputs.
 
-    // 7 6 5 4 3 2 1 0
-    DDRC = 0b11111111; // All PORT C pins are outputs
+    DDRA |= LED_MASK_A;
+    DDRB |= LED_MASK_B;
+    DDRC |= LED_MASK_C;
+    DDRD |= LED_MASK_D;
 
-    // 7 6 5 4 3 2 1 0
-    DDRD = 0b11111111; // All PORT D pins are outputs
+    // PORTA =  0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
+    // PORTB &= 0b00011111; // PB0-4 columns HIGH
+    // PORTC =  0b00000000; // PC0-7 rows LOW
+    // PORTD =  0b11111111; // PD0-7 columns HIGH
+    // PORTE &= 0b00000000; // PE0-2 rows LOW
+
+
+    // Configure LED pins as outputs without changing PB5-7
+
+    // DDRA = 0b11111111; // All PORT A pins are outputs
+    // DDRB |= 0b00011111; // PB0-PB4 outputs
+    // DDRC = 0b11111111; // All PORT C pins are outputs
+    // DDRD = 0b11111111; // All PORT D pins are outputs
+    // DDRE |= 0b00000111; // PE0-PE2 outputs
 }
 
 
-uint8_t get_brightness(uint8_t i)
+void set_led_rows_low(void)
 {
-    return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
+    PORTA &= ~ROW_MASK_A;
+    PORTB &= ~ROW_MASK_B;
+    PORTC &= ~ROW_MASK_C;
+    PORTD &= ~ROW_MASK_D;
 }
 
-
-uint8_t masks[4] = {
+uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
 
-uint8_t increments[4] = {
+uint8_t brightness_increments[4] = {
     0x01, 0x04, 0x10, 0x40
 };
 
 
-// Dark magic
-static void add_brightness_v4(uint8_t i)
+// Magic
+void add_brightness_v4(uint8_t i)
 {
     uint8_t *p = &brightness[i >> 2];
     uint8_t pos = i & 3;
 
-    uint8_t mask = masks[pos];
+    uint8_t mask = brightness_masks[pos];
 
     if ((*p & mask) != mask)
-        *p += increments[pos];
+        *p += brightness_increments[pos];
 }
 
 // void add_brightness(uint8_t i, uint8_t amount)
@@ -178,14 +157,21 @@ void process_particle(uint8_t x, uint8_t y)
 
 void update_brightness(void)
 {
-    // Clear frame buffer
-    memset(brightness, 0, sizeof(brightness));
+	// Prevents infinite loop for the LED timer ISR.
+	brightness[0] = 1u;
 
-    for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
-    {
-        uint8_t led_x = p[i].x >> 4;
-        uint8_t led_y = p[i].y >> 4;
+	// Clear the remaining framebuffer.
+	memset(&brightness[1], 0, sizeof(brightness) - 1);
 
-        process_particle(led_x, led_y);
-    }
+	for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
+	{
+		uint8_t led_x = p[i].x >> 4;
+		uint8_t led_y = p[i].y >> 4;
+
+		process_particle(led_x, led_y);
+	}
+
+	// Remove sentinel contribution.
+	if ((brightness[0] & 0x03u) == 2u)
+	brightness[0] -= 1u;
 }
