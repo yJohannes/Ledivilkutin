@@ -10,8 +10,8 @@
 #define I2C_PIN_SDA PB5
 #define I2C_PIN_SCL PB6
 
-#define I2C_SDA_MASK (1 << I2C_PIN_SDA)
-#define I2C_SCL_MASK (1 << I2C_PIN_SCL)
+#define I2C_SDA_MASK _BV(I2C_PIN_SDA)
+#define I2C_SCL_MASK _BV(I2C_PIN_SCL)
 
 
 static inline void i2c_sda_low()
