@@ -6,9 +6,13 @@ Some related math and notes can be found in `notes`.
 
 ## Logs
 
+4/11/2026
+- I'm going to sleep now
+
 3/11/2026
 - Derived functions to calculate frequencies and OCR0 values for LED interrupt timer.
 - LED PWM should now work.
+- Fixed TONS of bugs.
 - Prepared to program the MCU tomorrow.
 
 2/11/2026
