@@ -1,6 +1,7 @@
 #include "leds.h"
 
 #include <avr/io.h>
+#include <avr/sfr_defs.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -8,6 +9,8 @@
 #include "sim.h"
 #include "sim_config.h"
 
+
+uint8_t brightness[64];
 
 const LedPin ROW_PINS[LEDS_Y] = {
     {&PORTA, _BV(PA3)}, // PIN_ROW_0
@@ -48,9 +51,6 @@ const LedPin COL_PINS[LEDS_X] = {
 };
 
 
-uint8_t brightness[64];
-
-
 void init_led_pins(void)
 {
     // Set to prevent infinite loop in LED interrupt.
@@ -60,30 +60,48 @@ void init_led_pins(void)
     // Rows     LOW       HIGH
     // Columns 	HIGH      LOW
 
-    // Initial output states
+    // Set initial inactive output states:
     // Rows = HIGH, cols = LOW
-    PORTA = 0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
-    PORTB &= 0b00011111; // PB0-4 columns HIGH
-    PORTC = 0b00000000; // PC0-7 rows LOW
-    PORTD = 0b11111111; // PD0-7 columns HIGH
-    PORTE &= 0b00000000; // PE0-2 rows LOW
 
-    // 3 4 5 6 7 2 1 0
-    DDRA = 0b11111111; // All PORT A pins are outputs
+    PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
+    PORTB = (PORTB & ~LED_MASK_B) | COL_MASK_B;
+    PORTC = (PORTC & ~LED_MASK_C) | COL_MASK_C;
+    PORTD = (PORTD & ~LED_MASK_D) | COL_MASK_D;
+    PORTE = (PORTE & ~LED_MASK_E) | COL_MASK_E;
 
-    // 0 1 2 3 4
-    DDRB |= 0b00001111; // PB0-PB4 outputs
+    // Configure LED pins as outputs.
 
-    // 7 6 5 4 3 2 1 0
-    DDRC = 0b11111111; // All PORT C pins are outputs
+    DDRA |= LED_MASK_A;
+    DDRB |= LED_MASK_B;
+    DDRC |= LED_MASK_C;
+    DDRD |= LED_MASK_D;
+    DDRE |= LED_MASK_E;
 
-    // 7 6 5 4 3 2 1 0
-    DDRD = 0b11111111; // All PORT D pins are outputs
+    // PORTA =  0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
+    // PORTB &= 0b00011111; // PB0-4 columns HIGH
+    // PORTC =  0b00000000; // PC0-7 rows LOW
+    // PORTD =  0b11111111; // PD0-7 columns HIGH
+    // PORTE &= 0b00000000; // PE0-2 rows LOW
 
-    // 0 1 2
-    DDRE |= 0b00000111; // PE0-PE2 outputs
+
+    // Configure LED pins as outputs without changing PB5-7
+
+    // DDRA = 0b11111111; // All PORT A pins are outputs
+    // DDRB |= 0b00011111; // PB0-PB4 outputs
+    // DDRC = 0b11111111; // All PORT C pins are outputs
+    // DDRD = 0b11111111; // All PORT D pins are outputs
+    // DDRE |= 0b00000111; // PE0-PE2 outputs
 }
 
+
+void set_led_rows_low(void)
+{
+    PORTA &= ~ROW_MASK_A;
+    PORTB &= ~ROW_MASK_B;
+    PORTC &= ~ROW_MASK_C;
+    PORTD &= ~ROW_MASK_D;
+    PORTE &= ~ROW_MASK_E;
+}
 
 uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
