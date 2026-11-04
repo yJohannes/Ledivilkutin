@@ -2,6 +2,9 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
+#include <avr/common.h>
+
+
 #include <util/delay.h>
 
 #include <stdbool.h>
@@ -17,7 +20,8 @@
 volatile bool button_pressed = false;
 
 /// @brief Flag to simulate a step set by timer @ 19 Hz
-volatile bool simulate_step = false;
+// volatile bool simulate_step = false;
+volatile uint8_t pending_steps = 0;
 
 volatile uint8_t current_led = 0;
 
@@ -200,12 +204,6 @@ ISR(TIMER0_COMP_vect)
 
     uint8_t brightness;
 
-    // do
-    // {
-    //     brightness = get_brightness(++current_led);
-    // }
-    // while (brightness == 0);
-
     // TODO: ensure this doesn't take too long
     do
     {
@@ -273,7 +271,8 @@ static void stop_led_timer(void)
 
 ISR(TIMER1_COMPA_vect)
 {
-    simulate_step = true;
+    // simulate_step = true;
+    ++pending_steps;
 }
 
 
@@ -320,7 +319,8 @@ static void stop_sim_timer(void)
     TIMSK &= ~(1 << OCIE1A);      // Disable compare interrupt
 
     // Discard any pending simulation step
-    simulate_step = false;
+    // simulate_step = false;
+    pending_steps = 0u;
 }
 
 
@@ -469,6 +469,28 @@ static void ledivilkutin_check_button(void)
     SREG = old_sreg;
 }
 
+static void wait_for_simulation_step(void)
+{
+    while (1)
+    {
+        cli();
+
+        if (pending_steps > 0)
+        {
+            --pending_steps;
+            sei();
+            return;  // A step is ready. Start immediately.
+        }
+
+        set_sleep_mode(SLEEP_MODE_IDLE);
+        sleep_enable();
+
+        sei();
+        sleep_cpu();
+        sleep_disable();
+    }
+}
+
 
 int main()
 {
@@ -494,20 +516,22 @@ int main()
         }
 
         // Wait for simulation tick
-        while (!simulate_step)
-        {
-            set_sleep_mode(SLEEP_MODE_IDLE);
-            sleep_mode();
+        // while (!simulate_step)
+        // {
+        //     set_sleep_mode(SLEEP_MODE_IDLE);
+        //     sleep_mode();
 
-            // If button is pressed just do the next simulation tick to not
-            // waste cycles here performing checks after every interrupt.
-        }
+        //     // If button is pressed just do the next simulation tick to not
+        //     // waste cycles here performing checks after every interrupt.
+        // }
+
+        wait_for_simulation_step();
 
         ledivilkutin_update_acceleration();
         simulation_step();
         update_brightness();
 
-        simulate_step = false;
+        // simulate_step = false;
     }
 }
 
