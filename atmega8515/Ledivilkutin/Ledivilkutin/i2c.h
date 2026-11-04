@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define I2C_HALF_CLOCK_US 2
 
 #define I2C_WRITE 0
 #define I2C_READ  1
