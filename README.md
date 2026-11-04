@@ -1,6 +1,15 @@
 # Ledivilkutin
 
+Hi
+
+Some related math and notes can be found in `notes`.
+
 ## Logs
+
+3/11/2026
+- Derived functions to calculate frequencies and OCR0 values for LED interrupt timer.
+- LED PWM should now work.
+- Prepared to program the MCU tomorrow.
 
 2/11/2026
 - Struggled a lot with efficient LED PWM. Still finished it with hopefully enough optimizations.
@@ -81,10 +90,12 @@ pre
 ## Programming the microcontroller checklist
 
 ### Before programming
-- Set correct platform in `i2c_config.h`.
+- Clone **DEV** branch of this repository.
+- Set the macro for the correct platform for i2c.
 - Compile with -O2 not -Os.
 
 ### After programming
+- DONT PRESS THE BUTTON, USE RESISTOR.
 - Wire VCC, GND, AD0->GND, SDA->PB5 and SCL->PB6.
 - Ask for an additional piece of two-sided tape for the accelerometer.
 
