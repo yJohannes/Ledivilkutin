@@ -102,8 +102,8 @@ namespace ledv::gui
             }
 
             // Remove sentinel contribution.
-            if ((brightness[0] & 0x03u) == 2u)
-                brightness[0] -= 1u;
+            if ((brightness[0] & 0x03u) < 3u)
+                brightness[0] -= 1u;  // Guaranteed to be at least 1 so this is ok
         }
 
     }
