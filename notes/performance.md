@@ -131,3 +131,113 @@ These results indicate timers are working as intended.
 | ------------ | ------------ | ------------ | ----------- | ------------- | ----- |
 | `-O2`        | 3,102        | 108          | 377         | 3,587         | `e03` |
 | `-Os`        | 2,648        | 108          | 377         | 3,133         | `c3d` |
+
+
+# 3-4/11/2026
+
+Cycles after final testing
+
+18275
+877720
+1570676
+1925460
+3236723
+3558396
+4471582
+4807208
+5224375
+5656105
+6069866
+6490900
+7487778
+7759553
+8180149
+9042065
+
+VERY unstable.
+
+Consecutive differences:
+859445
+692956
+354784
+1311263
+321673
+913186
+335626
+417167
+431730
+413761
+421034
+996878
+271775
+420596
+861916
+
+
+So after applying a `pending_steps` counter the frames stabilized.
+
+18286
+877734
+2106236
+2341199
+2545019
+2730769
+2909186
+3125344
+3543477
+3967299
+4391808
+4807506
+5238319
+5658021
+6075703
+6499376
+6910661
+7334918
+7760697
+8182779
+8597998
+9020288
+
+
+The new measurements look substantially more stable after the first interval.
+
+The first interval is unusually long, but after that the intervals appear to settle around 420,000 cycles. That is consistent with the pending-step counter fixing the lost-event problem.
+
+Here are the actual consecutive differences:
+
+| Interval | Cycles    |
+| -------- | --------- |
+| 1        | 859,448   |
+| 2        | 1,228,502 |
+| 3        | 234,963   |
+| 4        | 203,820   |
+| 5        | 185,750   |
+| 6        | 178,417   |
+| 7        | 216,158   |
+| 8        | 418,133   |
+| 9        | 423,822   |
+| 10       | 424,509   |
+| 11       | 415,698   |
+| 12       | 430,813   |
+| 13       | 419,702   |
+| 14       | 417,682   |
+| 15       | 423,673   |
+| 16       | 411,285   |
+| 17       | 424,257   |
+| 18       | 425,779   |
+| 19       | 422,082   |
+| 20       | 415,219   |
+| 21       | 422,290   |
+
+This is actually quite interesting:
+
+- Intervals 3–7 are much shorter than normal.
+- From interval 8 onward, they stabilize around 420,000 cycles.
+- At 8 MHz, 420,000 cycles is approximately 52.5 ms, which corresponds closely to your 19 Hz Timer1 interrupt.
+
+My interpretation: the short intervals are likely the simulation catching up on pending ticks. The counter preserves ticks that accumulated while the main loop was busy, so it processes them immediately instead of sleeping between steps.
+
+The stable intervals afterward indicate that the simulation is keeping pace with Timer1.
+
+If you do not want catch-up behavior after initialization or pausing, clear `pending_steps` at those transitions. Otherwise, preserving the backlog is the correct behavior when every timer tick must be processed.
