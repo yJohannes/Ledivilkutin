@@ -340,9 +340,7 @@ static void ledivilkutin_initialize(void)
     // Wait for button press before starting I2C over pins PB5 & PB6
     wait_for_button_interrupt();
 
-    // Debounce
-    _delay_ms(50);
-
+    _delay_ms(50); // Debounce
     wait_for_button_release();
 
     disable_button_interrupt();
