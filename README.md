@@ -2,7 +2,32 @@
 
 Hi
 
+
+## Setup
+
+### Arduino
+
+```
+cd arduino
+sync_lib
+```
+- `arduino/sync_lib.bat` installs the `mpu6050_i2c` library for the Arduino IDE.
+
+### C
+- Install AVR-GCC
+- CMake configure & build
+
+```
+cd c
+run gui
+```
+
+### Python
+- See python/README
+
+
 Some related math and notes can be found in `notes`.
+
 
 ## Logs
 
