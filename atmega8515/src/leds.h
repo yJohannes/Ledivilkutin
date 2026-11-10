@@ -2,6 +2,8 @@
 #define LEDS_H
 
 #include <avr/io.h>
+#include <avr/pgmspace.h>
+
 
 #include <stdint.h>
 
@@ -69,8 +71,8 @@ typedef struct {
     uint8_t mask;
 } LedPin;
 
-extern const LedPin ROW_PINS[LEDS_Y];
-extern const LedPin COL_PINS[LEDS_X];
+extern const LedPin ROW_PINS[LEDS_Y]; // PROGMEM;
+extern const LedPin COL_PINS[LEDS_X]; // PROGMEM;
 
 
 /// @brief 2 bits of brightness values per LED.
@@ -78,7 +80,17 @@ extern const LedPin COL_PINS[LEDS_X];
 /// (i >> 2) & 0b00000011  // Bits 2–3
 /// (i >> 4) & 0b00000011  // Bits 4–5
 /// (i >> 6) & 0b00000011  // Highest 2 bits
+// #define LEDS_DOUBLE_BUFFER
+
+#ifdef LEDS_DOUBLE_BUFFER
+extern uint8_t *volatile brightness;
+
+extern uint8_t buf_a[64];
+extern uint8_t buf_b[64];
+#else
 extern uint8_t brightness[64];
+#endif
+
 
 
 void init_led_pins(void);
@@ -89,7 +101,7 @@ static inline uint8_t get_brightness(uint8_t i)
     return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
 }
 
-void add_brightness(uint8_t i);
+// void add_brightness(uint8_t i);
 void add_brightness_v4(uint8_t i);
 void process_particle(uint8_t x, uint8_t y);
 

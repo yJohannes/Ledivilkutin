@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
+#include <avr/interrupt.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -10,7 +11,14 @@
 #include "sim_config.h"
 
 
+#ifdef LEDS_DOUBLE_BUFFER
+uint8_t buf_a[64];
+uint8_t buf_b[64];
+uint8_t *volatile brightness = buf_a;   // read by ISR
+static uint8_t *back_buf  = buf_b;     // written by main
+#else
 uint8_t brightness[64];
+#endif
 
 const LedPin ROW_PINS[LEDS_Y] = {
     {&PORTA, _BV(PA3)}, // PIN_ROW_0
@@ -61,7 +69,7 @@ void init_led_pins(void)
     // Columns 	HIGH      LOW
 
     // Set initial inactive output states:
-    // Rows = HIGH, cols = LOW
+    // Rows = LOW, cols = HIGH
 
     PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
     PORTB = (PORTB & ~LED_MASK_B) | COL_MASK_B;
@@ -103,11 +111,12 @@ void set_led_rows_low(void)
     PORTE &= ~ROW_MASK_E;
 }
 
-uint8_t brightness_masks[4] = {
+// No const so they stay in SRAM
+static uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
 
-uint8_t brightness_increments[4] = {
+static uint8_t brightness_increments[4] = {
     0x01, 0x04, 0x10, 0x40
 };
 
@@ -115,49 +124,75 @@ uint8_t brightness_increments[4] = {
 // Magic
 void add_brightness_v4(uint8_t i)
 {
-    uint8_t *p = &brightness[i >> 2];
+#ifdef LEDS_DOUBLE_BUFFER
+    uint8_t *pt = &back_buf[i >> 2];
+#else
+    uint8_t *pt = &brightness[i >> 2];
+#endif
+
     uint8_t pos = i & 3;
 
     uint8_t mask = brightness_masks[pos];
 
-    if ((*p & mask) != mask)
-        *p += brightness_increments[pos];
+    if ((*pt & mask) != mask)
+        *pt += brightness_increments[pos];
 }
 
-// void add_brightness(uint8_t i, uint8_t amount)
-void add_brightness(uint8_t i)
-{
-    uint8_t shift = (i & 3) << 1;
-    // uint8_t mask = 3 << shift;
+// void add_brightness(uint8_t i)
+// {
+//     uint8_t shift = (i & 3) << 1;
+//     // uint8_t mask = 3 << shift;
 
-    uint8_t value = (brightness[i >> 2] >> shift) & 3;
+//     uint8_t value = (brightness[i >> 2] >> shift) & 3;
 
-    if (value < 3)
-    {
-        // value += amount;
-        ++value;
-        if (value > 3) value = 3;
+//     if (value < 3)
+//     {
+//         // value += amount;
+//         ++value;
+//         if (value > 3) value = 3;
 
-        brightness[i >> 2] =
-            (brightness[i >> 2] & ~(3 << shift)) | (value << shift);
-            // (brightness[i >> 2] & ~mask) | (value << shift);
-    }
-}
+//         brightness[i >> 2] =
+//             (brightness[i >> 2] & ~(3 << shift)) | (value << shift);
+//             // (brightness[i >> 2] & ~mask) | (value << shift);
+//     }
+// }
+
 
 void process_particle(uint8_t x, uint8_t y)
 {
     uint8_t i = y * LEDS_X + x;
 
     // Set max brightness
+#ifdef LEDS_DOUBLE_BUFFER
+    back_buf[i >> 2] |= 3 << ((i & 3) << 1);
+#else
     brightness[i >> 2] |= 3 << ((i & 3) << 1);
+#endif
 
     if (x > 0)  add_brightness_v4(i - 1);
     if (x < 15) add_brightness_v4(i + 1);
-    if (y > 0)  add_brightness_v4(i - 16);
-    if (y < 15) add_brightness_v4(i + 16);
+    if (y > 0)  add_brightness_v4(i - LEDS_Y);
+    if (y < 15) add_brightness_v4(i + LEDS_Y);
 }
 
+#ifdef LEDS_DOUBLE_BUFFER
+void update_brightness(void)
+{
+    memset(back_buf, 0, 64);
 
+    for (uint8_t i = 0; i < SIM_PARTICLE_COUNT; ++i)
+        process_particle(p[i].x >> 4, p[i].y >> 4);
+
+    // Swap atomically
+    uint8_t sreg = SREG;
+    cli();
+
+    uint8_t *t = brightness;
+    brightness = back_buf;
+    back_buf = t;
+    SREG = sreg;
+}
+#else
 void update_brightness(void)
 {
     // Prevents infinite loop for the LED timer ISR.
@@ -178,3 +213,4 @@ void update_brightness(void)
     if ((brightness[0] & 0x03u) < 3u)
         brightness[0] -= 1u;  // Guaranteed to be at least 1 so this is ok
 }
+#endif
