@@ -17,15 +17,15 @@
 #include "sim_config.h"
 
 
+#define DISABLE_I2C
+
 volatile bool button_pressed = false;
+bool running = false;
 
 /// @brief Flag to simulate a step set by timer @ 19 Hz
 // volatile bool simulate_step = false;
 volatile uint8_t pending_steps = 0;
-
 volatile uint8_t current_led = 0;
-
-bool running = false;
 
 
 // ============================================================================
@@ -52,8 +52,13 @@ void init_button_interrupt(void)
 
     // Configure INT0 for falling-edge triggering.
     // ISC01 = 1, ISC00 = 0 is Falling edge
-    MCUCR |= (1 << ISC01);
+    // MCUCR |= (1 << ISC01);
+    // MCUCR &= ~(1 << ISC00);
+
+    // INT0: low-level triggering
+    MCUCR &= ~(1 << ISC01);
     MCUCR &= ~(1 << ISC00);
+
 
     // Clear any pending interrupt flag.
     GIFR = (1 << INTF0);
@@ -143,34 +148,56 @@ static void wait_for_button_release(void)
 }
 
 
+// void wait_for_button_interrupt(void)
+// {
+//     // Disable global interrupts to prevent an ISR from executing
+//     // while we check the button flag and prepare to sleep.
+//     cli();
+
+//     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+//     while (!button_pressed)
+//     {
+//         sleep_enable(); // Enable the sleep mechanism (does not sleep yet).
+
+//         // Re-enable interrupts.
+//         // AVR guarantees that the instruction immediately following
+//         // sei() executes before any pending interrupt is serviced.
+//         sei();
+
+//         // Enter the selected sleep mode (Power-down).
+//         // If INT0 is pending, the MCU enters sleep and immediately
+//         // wakes up to execute the interrupt handler.
+//         sleep_cpu();
+//         sleep_disable(); // Execution resumes here after waking up.
+
+//         // Disable interrupts again before checking button_pressed.
+//         cli();
+//     }
+
+//     // Button was pressed. Re-enable interrupts before returning.
+//     sei();
+// }
+
+
 void wait_for_button_interrupt(void)
 {
-    // Disable global interrupts to prevent an ISR from executing
-    // while we check the button flag and prepare to sleep.
-    cli();
-
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+    cli();
 
     while (!button_pressed)
     {
-        sleep_enable(); // Enable the sleep mechanism (does not sleep yet).
+        sleep_enable();
 
-        // Re-enable interrupts.
-        // AVR guarantees that the instruction immediately following
-        // sei() executes before any pending interrupt is serviced.
         sei();
-
-        // Enter the selected sleep mode (Power-down).
-        // If INT0 is pending, the MCU enters sleep and immediately
-        // wakes up to execute the interrupt handler.
         sleep_cpu();
-        sleep_disable(); // Execution resumes here after waking up.
 
-        // Disable interrupts again before checking button_pressed.
+        sleep_disable();
+
         cli();
     }
 
-    // Button was pressed. Re-enable interrupts before returning.
     sei();
 }
 
@@ -331,11 +358,37 @@ static void stop_sim_timer(void)
 static void ledivilkutin_initialize(void)
 {
     // pd2_set_button_mode();
+    init_led_pins(); // For debug
+
 
     init_button_interrupt();
     enable_button_interrupt();
 
     sei(); // Prolly be redundant
+
+    /// @warning DO NOT TOGGLE #define PIN_COL_11  PD2
+    /// SINCE THE BUTTON WONT OBVIOUSLY WORK
+
+    // Set new ON
+    *ROW_PINS[0].port |= ROW_PINS[0].mask;
+    *COL_PINS[0].port &= ~COL_PINS[0].mask;
+
+    _delay_ms(250);
+
+    // Set OFF
+    *ROW_PINS[0].port &= ~ROW_PINS[0].mask;
+    *COL_PINS[0].port |= COL_PINS[0].mask;
+
+
+    // Set new ON
+    *ROW_PINS[1].port |= ROW_PINS[1].mask;
+    *COL_PINS[1].port &= ~COL_PINS[1].mask;
+
+    _delay_ms(250);
+
+    // Set OFF
+    *ROW_PINS[1].port &= ~ROW_PINS[1].mask;
+    *COL_PINS[1].port |= COL_PINS[1].mask;
 
     // Wait for button press before starting I2C over pins PB5 & PB6
     wait_for_button_interrupt();
@@ -343,15 +396,44 @@ static void ledivilkutin_initialize(void)
     _delay_ms(50); // Debounce
     wait_for_button_release();
 
+    // Set new ON
+    *ROW_PINS[2].port |= ROW_PINS[2].mask;
+    *COL_PINS[2].port &= ~COL_PINS[2].mask;
+
+    _delay_ms(250);
+
+    // Set OFF
+    *ROW_PINS[2].port &= ~ROW_PINS[2].mask;
+    *COL_PINS[2].port |= COL_PINS[2].mask;
+
+
     disable_button_interrupt();
 
+    volatile bool grr = true;
+
+    while (grr)
+    {
+        // Set new ON
+        *ROW_PINS[15].port |= ROW_PINS[15].mask;
+        *COL_PINS[0].port &= ~COL_PINS[0].mask;
+
+        _delay_ms(500);
+
+        // // Set OFF
+        *ROW_PINS[15].port &= ~ROW_PINS[15].mask;
+        *COL_PINS[0].port |= COL_PINS[0].mask;
+
+        _delay_ms(500);
+    }
+
     // Init I2C only after this to allow removing the programming device.
+#ifndef DISABLE_I2C
     i2c_init();
     while (!mpu6050_init())
     {
         // Blink something to indicate
-        _delay_ms(250);
     }
+#endif
 
     cli();
     simulation_init();
@@ -377,11 +459,13 @@ static void ledivilkutin_sleep(void)
     // Reset LED pins to inactive states.
     init_led_pins();
 
+#ifndef DISABLE_I2C
     // Failure is acceptable: the sensor may already be disconnected.
     mpu6050_set_sleep(true);
 
     // Ensure I2C pins are released for possible programming.
     i2c_release_pins();
+#endif
 
     enable_button_interrupt();
 
@@ -394,9 +478,10 @@ static void ledivilkutin_sleep(void)
 
     disable_button_interrupt();
 
+#ifndef DISABLE_I2C
     // If it is disconnected, the next connectivity check handles recovery.
     mpu6050_set_sleep(false);
-
+#endif
     simulation_init();
 
     // Set to prevent infinite loop in LED interrupt.
@@ -510,6 +595,7 @@ int main()
             continue;
         }
 
+#ifndef DISABLE_I2C
         // Keep trying to initialize MPU6050 again
         if (!mpu6050_is_connected())
         {
@@ -518,6 +604,7 @@ int main()
             // Maybe blink a led here
             continue; // Keep trying to connect
         }
+#endif
 
         // Wait for simulation tick
         // while (!simulate_step)
@@ -530,8 +617,9 @@ int main()
         // }
 
         wait_for_simulation_step();
-
+#ifndef DISABLE_I2C
         ledivilkutin_update_acceleration();
+#endif
         simulation_step();
         update_brightness();
 
