@@ -49,17 +49,17 @@ cd /d "%OUT%"
 
 @REM  -DSIM_USE_POINTER_ITERATION ^
 
+
+    @REM  -Wconversion ^
+    @REM  -Wsign-conversion ^
 avr-gcc -mmcu=atmega8515 ^
-    -Os ^
+    -O2 ^
     -ffunction-sections ^
     -fdata-sections ^
-    -fpack-struct ^
     -Wl,--gc-sections ^
     -Wall ^
     -Wextra ^
     -Wpedantic ^
-    -Wconversion ^
-    -Wsign-conversion ^
     -Wshadow ^
     -Wundef ^
     -Wdouble-promotion ^
