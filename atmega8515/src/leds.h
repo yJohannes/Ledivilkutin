@@ -84,11 +84,9 @@ typedef struct {
 } LedPin;
 
 
-#define LEDS_ASM
 // #define LEDS_DOUBLE_BUFFER
 
 
-#ifdef LEDS_ASM
 static uint8_t row_tbl[48] = {
     0x08,0x10,0x20,0x40,0x80, 0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
     0,0,0,0,0,0,0,0, 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
@@ -103,10 +101,6 @@ static uint8_t col_tbl[48] = {
     0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE                           // PORTD
 };
 
-#else
-extern const LedPin ROW_PINS[LEDS_Y];
-extern const LedPin COL_PINS[LEDS_X];
-#endif
 
 /// @brief 2 bits of brightness values per LED.
 ///  i       & 0b00000011  // Lowest 2 bits

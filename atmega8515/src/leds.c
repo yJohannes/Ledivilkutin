@@ -20,46 +20,6 @@ static uint8_t *back_buf  = buf_b;     // written by main
 uint8_t brightness[64];
 #endif
 
-#ifdef LEDS_ASM
-#else
-const LedPin ROW_PINS[LEDS_Y] = {
-    {&PORTA, _BV(PA3)}, // PIN_ROW_0
-    {&PORTA, _BV(PA4)}, // PIN_ROW_1
-    {&PORTA, _BV(PA5)}, // PIN_ROW_2
-    {&PORTA, _BV(PA6)}, // PIN_ROW_3
-    {&PORTA, _BV(PA7)}, // PIN_ROW_4
-    {&PORTE, _BV(PE0)}, // PIN_ROW_5
-    {&PORTE, _BV(PE1)}, // PIN_ROW_6
-    {&PORTE, _BV(PE2)}, // PIN_ROW_7
-    {&PORTC, _BV(PC7)}, // PIN_ROW_8
-    {&PORTC, _BV(PC6)}, // PIN_ROW_9
-    {&PORTC, _BV(PC5)}, // PIN_ROW_10
-    {&PORTC, _BV(PC4)}, // PIN_ROW_11
-    {&PORTC, _BV(PC3)}, // PIN_ROW_12
-    {&PORTC, _BV(PC2)}, // PIN_ROW_13
-    {&PORTC, _BV(PC1)}, // PIN_ROW_14
-    {&PORTC, _BV(PC0)}  // PIN_ROW_15
-};
-
-const LedPin COL_PINS[LEDS_X] = {
-    {&PORTA, _BV(PA2)}, // PIN_COL_0
-    {&PORTD, _BV(PD7)}, // PIN_COL_1
-    {&PORTA, _BV(PA1)}, // PIN_COL_2
-    {&PORTD, _BV(PD6)}, // PIN_COL_3
-    {&PORTA, _BV(PA0)}, // PIN_COL_4
-    {&PORTD, _BV(PD5)}, // PIN_COL_5
-    {&PORTB, _BV(PB0)}, // PIN_COL_6
-    {&PORTD, _BV(PD4)}, // PIN_COL_7
-    {&PORTB, _BV(PB1)}, // PIN_COL_8
-    {&PORTD, _BV(PD3)}, // PIN_COL_9
-    {&PORTB, _BV(PB2)}, // PIN_COL_10
-    {&PORTD, _BV(PD2)}, // PIN_COL_11
-    {&PORTB, _BV(PB3)}, // PIN_COL_12
-    {&PORTD, _BV(PD1)}, // PIN_COL_13
-    {&PORTB, _BV(PB4)}, // PIN_COL_14
-    {&PORTD, _BV(PD0)}  // PIN_COL_15
-};
-#endif
 
 void init_led_pins(void)
 {
