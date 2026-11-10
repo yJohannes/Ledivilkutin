@@ -2,6 +2,8 @@
 
 #include "i2c.h"
 #include "mpu6050.h"
+#include "mpu6050_regs.h"
+
 
 bool g_initialized = false;
 
@@ -10,7 +12,7 @@ void setup()
   Serial.begin(38400);
   i2c_init();
 
-  if (i2c_test_ack(MPU6050_ADDR))
+  if (i2c_check_ack(MPU6050_ADDR))
     Serial.println("Acknowledged.");
   else
   {

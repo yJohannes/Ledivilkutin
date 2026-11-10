@@ -1,6 +1,6 @@
 #include "i2c.h"
 #include "mpu6050.h"
-
+#include "mpu6050_regs.h"
 
 int16_t ax, ay, az;
 int8_t ax8, ay8, az8;
