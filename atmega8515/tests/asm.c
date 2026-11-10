@@ -1,7 +1,29 @@
 #include <stdint.h>
+#include <avr/io.h>
 
 #define max_(a, b) ((a) > (b) ? (a) : (b))
 #define min_(a, b) ((a) < (b) ? (a) : (b))
+
+#define I2C_PIN_SDA PB5
+#define I2C_PIN_SCL PB6
+
+#define I2C_SDA_MASK _BV(I2C_PIN_SDA)
+#define I2C_SCL_MASK _BV(I2C_PIN_SCL)
+
+
+#define IO_SBI(reg, bit) __asm__ __volatile__("sbi %0,%1" :: "I"(_SFR_IO_ADDR(reg)), "I"(bit))
+#define IO_CBI(reg, bit) __asm__ __volatile__("cbi %0,%1" :: "I"(_SFR_IO_ADDR(reg)), "I"(bit))
+
+__attribute__((noinline, used))
+static void i2c_sda_low_asm(void)     { IO_CBI(PORTB, I2C_PIN_SDA); IO_SBI(DDRB, I2C_PIN_SDA); }
+
+__attribute__((noinline, used))
+static void i2c_sda_low(void)
+{
+    PORTB &= ~I2C_SDA_MASK;
+    DDRB |= I2C_SDA_MASK;
+}
+
 
 __attribute__((noinline, used))
 static uint8_t division(uint16_t x)
