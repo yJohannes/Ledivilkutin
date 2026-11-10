@@ -44,6 +44,18 @@
 // #define PIN_COL_14  PB4
 // #define PIN_COL_15  PD0
 
+// PORTA =  0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
+// PORTB &= 0b00011111; // PB0-4 columns HIGH
+// PORTC =  0b00000000; // PC0-7 rows LOW
+// PORTD =  0b11111111; // PD0-7 columns HIGH
+// PORTE &= 0b00000000; // PE0-2 rows LOW
+
+// DDRA = 0b11111111; // All PORT A pins are outputs
+// DDRB |= 0b00011111; // PB0-PB4 outputs
+// DDRC = 0b11111111; // All PORT C pins are outputs
+// DDRD = 0b11111111; // All PORT D pins are outputs
+// DDRE |= 0b00000111; // PE0-PE2 outputs
+
 #define ROW_MASK_A 0b11111000
 #define COL_MASK_A 0b00000111
 
@@ -71,16 +83,36 @@ typedef struct {
     uint8_t mask;
 } LedPin;
 
-extern const LedPin ROW_PINS[LEDS_Y]; // PROGMEM;
-extern const LedPin COL_PINS[LEDS_X]; // PROGMEM;
 
+#define LEDS_ASM
+// #define LEDS_DOUBLE_BUFFER
+
+
+#ifdef LEDS_ASM
+static uint8_t row_tbl[48] = {
+    0x08,0x10,0x20,0x40,0x80, 0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
+    0,0,0,0,0,0,0,0, 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
+    0,0,0,0,0, 0x01,0x02,0x04, 0,0,0,0,0,0,0,0                        // PORTE
+};
+static uint8_t col_tbl[48] = {
+    0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
+    0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
+    0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
+    0x1D,0x1F,0x1B,0x1F,0x17,0x1F,0x0F,0x1F,                          // PORTB (bits 0-4)
+    0xFF,0x7F,0xFF,0xBF,0xFF,0xDF,0xFF,0xEF,
+    0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE                           // PORTD
+};
+
+#else
+extern const LedPin ROW_PINS[LEDS_Y];
+extern const LedPin COL_PINS[LEDS_X];
+#endif
 
 /// @brief 2 bits of brightness values per LED.
 ///  i       & 0b00000011  // Lowest 2 bits
 /// (i >> 2) & 0b00000011  // Bits 2–3
 /// (i >> 4) & 0b00000011  // Bits 4–5
 /// (i >> 6) & 0b00000011  // Highest 2 bits
-// #define LEDS_DOUBLE_BUFFER
 
 #ifdef LEDS_DOUBLE_BUFFER
 extern uint8_t *volatile brightness;
@@ -107,5 +139,31 @@ void process_particle(uint8_t x, uint8_t y);
 
 /// @brief Computes the LED brightness map based on particle positions.
 void update_brightness(void);
+
+// ON: row HIGH, col LOW
+static inline void set_led_on(uint8_t x, uint8_t y)
+{
+    const uint8_t *r = &row_tbl[y];
+    const uint8_t *c = &col_tbl[x];
+
+    PORTA = (PORTA | r[0])  & (c[0]  | 0xF8);   // 0xF8: don't clear the row bits PA3-7
+    PORTB =  PORTB          & (c[16] | 0xE0);   // 0xE0: PB5-7 untouched
+    PORTC |= r[16];
+    PORTD &= c[32];
+    PORTE |= r[32];
+}
+
+// OFF: row LOW, col HIGH
+static inline void set_led_off(uint8_t x, uint8_t y)
+{
+    const uint8_t *r = &row_tbl[y];
+    const uint8_t *c = &col_tbl[x];
+
+    PORTA = (PORTA & ~r[0])  | (~c[0]  & 0x07);
+    PORTB =  PORTB           | (~c[16] & 0x1F);
+    PORTC &= ~r[16];
+    PORTD |= ~c[32];
+    PORTE &= ~r[32];
+}
 
 #endif // LEDS_H

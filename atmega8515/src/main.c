@@ -3,8 +3,7 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/common.h>
-
-
+#include <avr/sfr_defs.h>
 #include <util/delay.h>
 
 #include <stdbool.h>
@@ -211,6 +210,108 @@ static const uint8_t brightness_ocr[] = {
     0, 64, 99, 199
 };
 
+#ifdef LEDS_ASM
+ISR(TIMER0_COMP_vect)
+{
+    uint8_t led = current_led;
+    uint8_t b;
+
+    for (;;) {
+        led++;                              // wraps 255 -> 0
+        uint8_t v = brightness[led >> 2];
+        if (v == 0) { led |= 3; continue; } // whole group of 4 is off, skip it
+        if (led & 2) v >>= 4;               // unsigned: no asr/ror loop
+        if (led & 1) v >>= 2;
+        b = v & 3;
+        if (b) break;
+    }
+    current_led = led;
+
+    uint8_t *z, *y;
+    uint8_t t0, t1;
+
+    asm volatile(
+        // Z = &row_tbl[led >> 4]
+        "mov  %A0, %4              \n\t"
+        "swap %A0                  \n\t"
+        "andi %A0, 0x0F            \n\t"
+        "ldi  %B0, 0               \n\t"
+        "subi %A0, lo8(-(%[rt]))   \n\t"
+        "sbci %B0, hi8(-(%[rt]))   \n\t"
+        // Y = &col_tbl[led & 15]
+        "mov  %A1, %4              \n\t"
+        "andi %A1, 0x0F            \n\t"
+        "ldi  %B1, 0               \n\t"
+        "subi %A1, lo8(-(%[ct]))   \n\t"
+        "sbci %B1, hi8(-(%[ct]))   \n\t"
+        // port writes
+        "ld   %2, Z                \n\t"
+        "ld   %3, Y                \n\t"
+        "or   %2, %3               \n\t"
+        "out  %[pa], %2            \n\t"
+        "in   %2, %[pb]            \n\t"
+        "andi %2, 0xE0             \n\t"   // keep PB7..PB5
+        "ldd  %3, Y+16             \n\t"
+        "or   %2, %3               \n\t"
+        "out  %[pb], %2            \n\t"
+        "ldd  %2, Z+16             \n\t"
+        "out  %[pc], %2            \n\t"
+        "ldd  %2, Y+32             \n\t"
+        "out  %[pd], %2            \n\t"
+        "ldd  %2, Z+32             \n\t"
+        "out  %[pe], %2            \n\t"
+        : "=&z"(z), "=&y"(y), "=&d"(t0), "=&d"(t1)
+        : "r"(led),
+          [rt] "i"(row_tbl), [ct] "i"(col_tbl),
+          [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
+          [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
+          [pe] "I"(_SFR_IO_ADDR(PORTE))
+        : "cc");
+
+    OCR0 = brightness_ocr[b];
+}
+
+// ISR(TIMER0_COMP_vect)
+// {
+//     uint8_t led = current_led;
+//     uint8_t b;
+
+//     do {
+//         b = get_brightness(++led);       // wraps 255 -> 0 by itself
+//     } while (b == 0);
+
+//     current_led = led;
+
+//     const uint8_t *r = &T.row[led >> 4];     // -> Z
+//     const uint8_t *c = &T.col[led & 0x0F];   // -> Y
+//     uint8_t t0, t1;
+
+//     asm volatile(
+//         "ld   %0, Z            \n\t"   // PORTA row bits
+//         "ld   %1, Y            \n\t"   // PORTA col bits
+//         "or   %0, %1           \n\t"
+//         "out  %[pa], %0        \n\t"
+//         "in   %0, %[pb]        \n\t"   // PORTB: read-modify-write
+//         "andi %0, 0xE0         \n\t"   //   keep PB7..PB5 (I2C / ISP)
+//         "ldd  %1, Y+16         \n\t"
+//         "or   %0, %1           \n\t"
+//         "out  %[pb], %0        \n\t"
+//         "ldd  %0, Z+16         \n\t"   // PORTC rows
+//         "out  %[pc], %0        \n\t"
+//         "ldd  %0, Y+32         \n\t"   // PORTD cols
+//         "out  %[pd], %0        \n\t"
+//         "ldd  %0, Z+32         \n\t"   // PORTE rows
+//         "out  %[pe], %0        \n\t"
+//         : "=&d"(t0), "=&d"(t1)
+//         : "z"(r), "y"(c),
+//           [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
+//           [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
+//           [pe] "I"(_SFR_IO_ADDR(PORTE))
+//         : "cc");
+
+//     OCR0 = brightness_ocr[b];
+// }
+#else
 /// @brief Interrupt to update the LEDs.
 ISR(TIMER0_COMP_vect)
 {
@@ -255,7 +356,48 @@ ISR(TIMER0_COMP_vect)
     // pass over the OCR0 value causing a wait for overflow + count.
     OCR0 = brightness_ocr[brightness];
 }
+#endif
 
+// ISR(TIMER0_COMP_vect)
+// {
+//     uint8_t led = current_led;
+//     uint8_t b;
+
+//     do {
+//         b = get_brightness(++led);       // wraps 255 -> 0 by itself
+//     } while (b == 0);
+
+//     current_led = led;
+
+//     const uint8_t *r = &T.row[led >> 4];     // -> Z
+//     const uint8_t *c = &T.col[led & 0x0F];   // -> Y
+//     uint8_t t0, t1;
+
+//     asm volatile(
+//         "ld   %0, Z            \n\t"   // PORTA row bits
+//         "ld   %1, Y            \n\t"   // PORTA col bits
+//         "or   %0, %1           \n\t"
+//         "out  %[pa], %0        \n\t"
+//         "in   %0, %[pb]        \n\t"   // PORTB: read-modify-write
+//         "andi %0, 0xE0         \n\t"   //   keep PB7..PB5 (I2C / ISP)
+//         "ldd  %1, Y+16         \n\t"
+//         "or   %0, %1           \n\t"
+//         "out  %[pb], %0        \n\t"
+//         "ldd  %0, Z+16         \n\t"   // PORTC rows
+//         "out  %[pc], %0        \n\t"
+//         "ldd  %0, Y+32         \n\t"   // PORTD cols
+//         "out  %[pd], %0        \n\t"
+//         "ldd  %0, Z+32         \n\t"   // PORTE rows
+//         "out  %[pe], %0        \n\t"
+//         : "=&d"(t0), "=&d"(t1)
+//         : "z"(r), "y"(c),
+//           [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
+//           [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
+//           [pe] "I"(_SFR_IO_ADDR(PORTE))
+//         : "cc");
+
+//     OCR0 = brightness_ocr[b];
+// }
 
 // https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
 #define TIMER0_PRESCALER_BITS (1 << CS01) // Prescaler: 8
@@ -369,26 +511,36 @@ static void ledivilkutin_initialize(void)
     /// @warning DO NOT TOGGLE #define PIN_COL_11  PD2
     /// SINCE THE BUTTON WONT OBVIOUSLY WORK
 
-    // Set new ON
-    *ROW_PINS[0].port |= ROW_PINS[0].mask;
-    *COL_PINS[0].port &= ~COL_PINS[0].mask;
-
-    _delay_ms(250);
-
-    // Set OFF
-    *ROW_PINS[0].port &= ~ROW_PINS[0].mask;
-    *COL_PINS[0].port |= COL_PINS[0].mask;
+    set_led_on(0, 0);
+    _delay_ms(500);
+    set_led_off(0, 0);
 
 
-    // Set new ON
-    *ROW_PINS[1].port |= ROW_PINS[1].mask;
-    *COL_PINS[1].port &= ~COL_PINS[1].mask;
+    set_led_on(1, 1);
+    _delay_ms(500);
+    set_led_off(1, 1);
 
-    _delay_ms(250);
 
-    // Set OFF
-    *ROW_PINS[1].port &= ~ROW_PINS[1].mask;
-    *COL_PINS[1].port |= COL_PINS[1].mask;
+    // // Set new ON
+    // *ROW_PINS[0].port |= ROW_PINS[0].mask;
+    // *COL_PINS[0].port &= ~COL_PINS[0].mask;
+
+    // _delay_ms(250);
+
+    // // Set OFF
+    // *ROW_PINS[0].port &= ~ROW_PINS[0].mask;
+    // *COL_PINS[0].port |= COL_PINS[0].mask;
+
+
+    // // Set new ON
+    // *ROW_PINS[1].port |= ROW_PINS[1].mask;
+    // *COL_PINS[1].port &= ~COL_PINS[1].mask;
+
+    // _delay_ms(250);
+
+    // // Set OFF
+    // *ROW_PINS[1].port &= ~ROW_PINS[1].mask;
+    // *COL_PINS[1].port |= COL_PINS[1].mask;
 
     // Wait for button press before starting I2C over pins PB5 & PB6
     wait_for_button_interrupt();
@@ -397,34 +549,34 @@ static void ledivilkutin_initialize(void)
     wait_for_button_release();
 
     // Set new ON
-    *ROW_PINS[2].port |= ROW_PINS[2].mask;
-    *COL_PINS[2].port &= ~COL_PINS[2].mask;
+    // *ROW_PINS[2].port |= ROW_PINS[2].mask;
+    // *COL_PINS[2].port &= ~COL_PINS[2].mask;
 
-    _delay_ms(250);
+    // _delay_ms(250);
 
-    // Set OFF
-    *ROW_PINS[2].port &= ~ROW_PINS[2].mask;
-    *COL_PINS[2].port |= COL_PINS[2].mask;
+    // // Set OFF
+    // *ROW_PINS[2].port &= ~ROW_PINS[2].mask;
+    // *COL_PINS[2].port |= COL_PINS[2].mask;
 
 
     disable_button_interrupt();
 
-    volatile bool grr = true;
 
-    while (grr)
-    {
-        // Set new ON
-        *ROW_PINS[15].port |= ROW_PINS[15].mask;
-        *COL_PINS[0].port &= ~COL_PINS[0].mask;
+    // volatile bool grr = true;
+    // while (grr)
+    // {
+    //     // Set new ON
+    //     *ROW_PINS[15].port |= ROW_PINS[15].mask;
+    //     *COL_PINS[0].port &= ~COL_PINS[0].mask;
 
-        _delay_ms(500);
+    //     _delay_ms(500);
 
-        // // Set OFF
-        *ROW_PINS[15].port &= ~ROW_PINS[15].mask;
-        *COL_PINS[0].port |= COL_PINS[0].mask;
+    //     // // Set OFF
+    //     *ROW_PINS[15].port &= ~ROW_PINS[15].mask;
+    //     *COL_PINS[0].port |= COL_PINS[0].mask;
 
-        _delay_ms(500);
-    }
+    //     _delay_ms(500);
+    // }
 
     // Init I2C only after this to allow removing the programming device.
 #ifndef DISABLE_I2C

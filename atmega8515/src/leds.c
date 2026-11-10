@@ -20,6 +20,8 @@ static uint8_t *back_buf  = buf_b;     // written by main
 uint8_t brightness[64];
 #endif
 
+#ifdef LEDS_ASM
+#else
 const LedPin ROW_PINS[LEDS_Y] = {
     {&PORTA, _BV(PA3)}, // PIN_ROW_0
     {&PORTA, _BV(PA4)}, // PIN_ROW_1
@@ -57,7 +59,7 @@ const LedPin COL_PINS[LEDS_X] = {
     {&PORTB, _BV(PB4)}, // PIN_COL_14
     {&PORTD, _BV(PD0)}  // PIN_COL_15
 };
-
+#endif
 
 void init_led_pins(void)
 {
@@ -70,7 +72,6 @@ void init_led_pins(void)
 
     // Set initial inactive output states:
     // Rows = LOW, cols = HIGH
-
     PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
     PORTB = (PORTB & ~LED_MASK_B) | COL_MASK_B;
     PORTC = (PORTC & ~LED_MASK_C) | COL_MASK_C;
@@ -78,27 +79,11 @@ void init_led_pins(void)
     PORTE = (PORTE & ~LED_MASK_E) | COL_MASK_E;
 
     // Configure LED pins as outputs.
-
     DDRA |= LED_MASK_A;
     DDRB |= LED_MASK_B;
     DDRC |= LED_MASK_C;
     DDRD |= LED_MASK_D;
     DDRE |= LED_MASK_E;
-
-    // PORTA =  0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
-    // PORTB &= 0b00011111; // PB0-4 columns HIGH
-    // PORTC =  0b00000000; // PC0-7 rows LOW
-    // PORTD =  0b11111111; // PD0-7 columns HIGH
-    // PORTE &= 0b00000000; // PE0-2 rows LOW
-
-
-    // Configure LED pins as outputs without changing PB5-7
-
-    // DDRA = 0b11111111; // All PORT A pins are outputs
-    // DDRB |= 0b00011111; // PB0-PB4 outputs
-    // DDRC = 0b11111111; // All PORT C pins are outputs
-    // DDRD = 0b11111111; // All PORT D pins are outputs
-    // DDRE |= 0b00000111; // PE0-PE2 outputs
 }
 
 
