@@ -13,6 +13,7 @@ mkdir "%OUT%"
 
 REM Copy main.c
 copy "%ROOT%atmega8515\src\main.c" "%OUT%\"
+copy "%ROOT%atmega8515\src\globals.h" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.c" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.h" "%OUT%\"
 

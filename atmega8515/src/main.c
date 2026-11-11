@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "globals.h"
 #include "i2c.h"
 #include "mpu6050.h"
 #include "sim.h"
