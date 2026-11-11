@@ -3,12 +3,15 @@
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 #include <avr/interrupt.h>
+#include <avr/common.h>
 
 #include <stdint.h>
 #include <string.h>
 
+#include "globals.h"
 #include "sim.h"
 #include "sim_config.h"
+
 
 
 #ifdef LEDS_DOUBLE_BUFFER
@@ -21,10 +24,26 @@ uint8_t brightness[64];
 #endif
 
 
+uint8_t row_tbl[48] = {
+    0x08,0x10,0x20,0x40,0x80, 0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
+    0,0,0,0,0,0,0,0, 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
+    0,0,0,0,0, 0x01,0x02,0x04, 0,0,0,0,0,0,0,0                        // PORTE
+};
+
+uint8_t col_tbl[48] = {
+    0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
+    0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
+    0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
+    0x1D,0x1F,0x1B,0x1F,0x17,0x1F,0x0F,0x1F,                          // PORTB (bits 0-4)
+    0xFF,0x7F,0xFF,0xBF,0xFF,0xDF,0xFF,0xEF,
+    0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE                           // PORTD
+};
+
+
 void init_led_pins(void)
 {
     // Set to prevent infinite loop in LED interrupt.
-    brightness[0] = 1u;
+    brightness[32+2] = 1u;
 
     // Signal   Inactive  Active
     // Rows     LOW       HIGH
@@ -55,6 +74,7 @@ void set_led_rows_low(void)
     PORTD &= ~ROW_MASK_D;
     PORTE &= ~ROW_MASK_E;
 }
+
 
 // No const so they stay in SRAM
 static uint8_t brightness_masks[4] = {
@@ -138,13 +158,18 @@ void update_brightness(void)
     SREG = sreg;
 }
 #else
+
+
 void update_brightness(void)
 {
-    // Prevents infinite loop for the LED timer ISR.
-    brightness[0] = 1u;
+    uint8_t sreg = SREG;
+    cli();
 
-    // Clear the remaining framebuffer.
-    memset(&brightness[1], 0, sizeof(brightness) - 1);
+    // Ensure LED is off before restoring interrupts.
+    set_led_off(LED_COL(current_led), LED_ROW(current_led));
+
+    // Clear the framebuffer.
+    memset(&brightness[0], 0, sizeof(brightness));
 
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
@@ -154,8 +179,8 @@ void update_brightness(void)
         process_particle(led_x, led_y);
     }
 
-    // Remove sentinel contribution.
-    if ((brightness[0] & 0x03u) < 3u)
-        brightness[0] -= 1u;  // Guaranteed to be at least 1 so this is ok
+
+    SREG = sreg;
 }
 #endif
+
