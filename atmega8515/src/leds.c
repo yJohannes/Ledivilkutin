@@ -185,6 +185,9 @@ void update_brightness(void)
         process_particle(led_x, led_y);
     }
 
+    // Turn back on for the brief moment to hopefully
+    // prevent flicker even slightly.
+    set_led_on(LED_COL(current_led), LED_ROW(current_led));
 
     SREG = sreg;
 }
