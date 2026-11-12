@@ -20,6 +20,7 @@ extern "C" {
 // XY only & Low Power Mode
 bool mpu6050_init(void);
 bool mpu6050_is_connected(void);
+bool mpu6050_check_identity(void);
 bool mpu6050_set_sleep(bool sleep);
 bool mpu6050_set_dlpf(uint8_t level); // Not implemented
 bool mpu6050_read_accel(int16_t* ax, int16_t* ay, int16_t* az);
