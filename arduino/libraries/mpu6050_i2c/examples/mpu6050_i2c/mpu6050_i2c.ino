@@ -19,6 +19,16 @@ void setup()
     delay(250);
   }
 
+  uint8_t who_am_i;
+  while (!i2c_read_register(MPU6050_ADDR, MPU6050_REG_WHO_AM_I, &who_am_i))
+  {
+    Serial.println("Failed to read MPU6050 register WHO_AM_I... Retrying...");
+  }
+
+  Serial.print("MPU6050 WHO_AM_I=");
+  Serial.print(who_am_i);
+  Serial.println("");
+
   while (!mpu6050_init())
   {
     Serial.println("Failed to initialize MPU6050... Retrying...");
