@@ -10,6 +10,8 @@
 #define MPU6050_ADDR     0x68
 
 #define MPU6050_WHO_AM_I        0x68
+#define MPU6050_WHO_AM_I_CLONE  0x72
+
 #define MPU6050_REG_WHO_AM_I    0x75
 
 #define MPU6050_REG_CONFIG 0x1A
@@ -21,6 +23,36 @@
 #define MPU6050_CONFIG_DLPF_CFG_21HZ  4
 #define MPU6050_CONFIG_DLPF_CFG_10HZ  5
 #define MPU6050_CONFIG_DLPF_CFG_5HZ   6
+
+#define MPU6050_REG_ACCEL_CONFIG             0x1C
+#define MPU6050_REG_CONFIG                   0x1A
+#define MPU6050_REG_SMPLRT_DIV               0x19
+
+// PWR_MGMT_1 register
+#define MPU6050_PWR_MGMT_1_CLKSEL_MASK       0x07
+#define MPU6050_PWR_MGMT_1_CLKSEL_INTERNAL   0x00
+// #define MPU6050_PWR_MGMT_1_SLEEP             0x40
+// #define MPU6050_PWR_MGMT_1_CYCLE             0x20
+// #define MPU6050_PWR_MGMT_1_TEMP_DIS          0x08
+
+// PWR_MGMT_2 register
+// #define MPU6050_PWR_MGMT_2_STBY_XA           0x20
+// #define MPU6050_PWR_MGMT_2_STBY_YA           0x10
+// #define MPU6050_PWR_MGMT_2_STBY_ZA           0x08
+// #define MPU6050_PWR_MGMT_2_STBY_XG           0x04
+// #define MPU6050_PWR_MGMT_2_STBY_YG           0x02
+// #define MPU6050_PWR_MGMT_2_STBY_ZG           0x01
+
+// ACCEL_CONFIG register
+#define MPU6050_ACCEL_CONFIG_AFS_SEL_MASK    0x18
+#define MPU6050_ACCEL_CONFIG_AFS_SEL_2G      0x00
+
+// CONFIG register
+#define MPU6050_CONFIG_DLPF_CFG_MASK         0x07
+#define MPU6050_CONFIG_DLPF_CFG_44HZ_ACCEL   0x03
+
+// SMPLRT_DIV register
+#define MPU6050_SMPLRT_DIV_125HZ             0x07
 
 #define MPU6050_REG_PWR_MGMT_1 0x6B
 #define MPU6050_PWR_MGMT_1_DEVICE_RESET (1u << 7)
