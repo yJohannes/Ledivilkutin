@@ -581,25 +581,12 @@ int main()
             continue; // Keep trying to connect
         }
 #endif
-
-        // Wait for simulation tick
-        // while (!simulate_step)
-        // {
-        //     set_sleep_mode(SLEEP_MODE_IDLE);
-        //     sleep_mode();
-
-        //     // If button is pressed just do the next simulation tick to not
-        //     // waste cycles here performing checks after every interrupt.
-        // }
-
         wait_for_simulation_step();
 #ifndef DISABLE_I2C
         ledivilkutin_update_acceleration();
 #endif
         simulation_step();
         update_brightness();
-
-        // simulate_step = false;
     }
 }
 
@@ -619,22 +606,3 @@ int main()
 // #define TIMER1_PRESCALER_256  (1 << CS12)
 // #define TIMER1_PRESCALER_1024 ((1 << CS12) | (1 << CS10))
 
-
-// typedef struct {
-//     uint8_t row[48];   // [0..15] PORTA  [16..31] PORTC  [32..47] PORTE   active = 1
-//     uint8_t col[48];   // [0..15] PORTA  [16..31] PORTB  [32..47] PORTD   active = 0
-// } tbl_t;
-
-// static tbl_t T = {     // non-const -> SRAM (.data), 96 bytes, no alignment needed
-//     .row = {
-//         0x08,0x10,0x20,0x40,0x80,0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
-//         0,0,0,0,0,0,0,0,0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
-//         0,0,0,0,0,0x01,0x02,0x04,0,0,0,0,0,0,0,0 },                      // PORTE
-//     .col = {
-//         0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
-//         0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
-//         0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
-//         0x1D,0x1F,0x1B,0x1F,0x17,0x1F,0x0F,0x1F,                          // PORTB (bits 0-4)
-//         0xFF,0x7F,0xFF,0xBF,0xFF,0xDF,0xFF,0xEF,
-//         0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE }                         // PORTD
-// };

@@ -8,7 +8,9 @@
 
 
 #define MPU6050_ADDR     0x68
-#define MPU6050_WHO_AM_I 0x68
+
+#define MPU6050_WHO_AM_I        0x68
+#define MPU6050_REG_WHO_AM_I    0x75
 
 #define MPU6050_REG_CONFIG 0x1A
 
@@ -42,8 +44,6 @@
 #define MPU6050_PWR_MGMT_2_STBY_XG (1u << 2) // Bit 2
 #define MPU6050_PWR_MGMT_2_STBY_YG (1u << 1) // Bit 1
 #define MPU6050_PWR_MGMT_2_STBY_ZG (1u << 0) // Bit 0
-
-#define MPU6050_REG_WHO_AM_I   0x75
 
 #define MPU6050_REG_ACCEL_XOUT 0x3B
 #define MPU6050_REG_ACCEL_YOUT 0x3D
