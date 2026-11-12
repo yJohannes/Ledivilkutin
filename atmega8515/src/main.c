@@ -17,10 +17,11 @@
 #include "sim_config.h"
 
 
-#define DISABLE_I2C
+// #define DISABLE_I2C
 
 volatile bool button_pressed = false;
 bool running = false;
+bool is_mpu6050_connected = false;
 
 /// @brief Flag to simulate a step set by timer @ 19 Hz
 // volatile bool simulate_step = false;
@@ -147,39 +148,6 @@ static void wait_for_button_release(void)
     }
 }
 
-
-// void wait_for_button_interrupt(void)
-// {
-//     // Disable global interrupts to prevent an ISR from executing
-//     // while we check the button flag and prepare to sleep.
-//     cli();
-
-//     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-
-//     while (!button_pressed)
-//     {
-//         sleep_enable(); // Enable the sleep mechanism (does not sleep yet).
-
-//         // Re-enable interrupts.
-//         // AVR guarantees that the instruction immediately following
-//         // sei() executes before any pending interrupt is serviced.
-//         sei();
-
-//         // Enter the selected sleep mode (Power-down).
-//         // If INT0 is pending, the MCU enters sleep and immediately
-//         // wakes up to execute the interrupt handler.
-//         sleep_cpu();
-//         sleep_disable(); // Execution resumes here after waking up.
-
-//         // Disable interrupts again before checking button_pressed.
-//         cli();
-//     }
-
-//     // Button was pressed. Re-enable interrupts before returning.
-//     sei();
-// }
-
-
 void wait_for_button_interrupt(void)
 {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -208,7 +176,8 @@ void wait_for_button_interrupt(void)
 
 // 0 is a dummy value.
 static const uint8_t brightness_ocr[] = {
-    0, 64, 99, 199
+    // 0, 64, 99, 199
+    0, 49, 84, 184
 };
 
 ISR(TIMER0_COMP_vect)
@@ -370,6 +339,38 @@ static void stop_sim_timer(void)
 // MAIN
 // ============================================================================
 
+static void ledivilkutin_check_button(void)
+{
+    uint8_t old_sreg = SREG;
+    cli();  // Stop interruptions during this check
+
+    // Make sure all LED rows are inactive.
+    set_leds_off();
+
+    // Switch PD2 to input with pull-up.
+    pd2_set_button_mode();
+
+    _delay_us(10);
+
+    // Button pressed = LOW
+    running = (PIND & (1 << BUTTON_PIN));
+
+    if (!running)
+    {
+        _delay_ms(50);
+        wait_for_button_release();
+    }
+
+    // Restore PD2 as an LED output.
+    // PD2 is a column pin so it's inactive state is HIGH.
+    pd2_set_led_mode();
+
+
+    // Restore the previous CPU status and interrupt state.
+    SREG = old_sreg;
+}
+
+
 static void ledivilkutin_initialize(void)
 {
     // pd2_set_button_mode();
@@ -407,8 +408,20 @@ static void ledivilkutin_initialize(void)
     i2c_init();
     while (!mpu6050_init())
     {
-        // Blink something to indicate
+        set_led_on(15, 15);
+        _delay_ms(250);
+        set_led_off(15, 15);
+        _delay_ms(250);
+
+
+        enable_button_interrupt();
+
+        // ledivilkutin_check_button();
+
+        disable_button_interrupt();
     }
+
+    is_mpu6050_connected = true;
 #endif
 
     cli();
@@ -475,16 +488,22 @@ static void ledivilkutin_update_acceleration(void)
     {
         sim_accel_timer = SIM_ACCELERATION_INTERVAL;
 
-        // On failure set acceleration to zero and if this was
-        // caused by MPU6050 disconnecting the code above will
-        // handle it.
-        if (!mpu6050_read_accel_xy_i8(&a.x, &a.y))
         {
-            a.x = 0;
-            a.y = 0;
+            // Don't allow timers to disturb I2C
+            uint8_t old_sreg = SREG;
+            cli();
+
+            if (!mpu6050_read_accel_xy_i8(&a.x, &a.y))
+            {
+                // On failure set acceleration to zero and if this was
+                // caused by MPU6050 disconnecting the code above will
+                // handle it.
+                a.x = 0;
+                a.y = 0;
+            }
+
+            SREG = old_sreg;
         }
-
-
 
         // // Divide by 4 to map acceleration to [-32, 31]
         // Divide by 8 to map acceleration to [-16, 15]
@@ -502,37 +521,6 @@ static void ledivilkutin_update_acceleration(void)
     }
 }
 
-
-static void ledivilkutin_check_button(void)
-{
-    uint8_t old_sreg = SREG;
-    cli();  // Stop interruptions during this check
-
-    // Make sure all LED rows are inactive.
-    set_led_rows_low();
-
-    // Switch PD2 to input with pull-up.
-    pd2_set_button_mode();
-
-    _delay_us(10);
-
-    // Button pressed = LOW
-    running = (PIND & (1 << BUTTON_PIN));
-
-    if (!running)
-    {
-        _delay_ms(50);
-        wait_for_button_release();
-    }
-
-    // Restore PD2 as an LED output.
-    // PD2 is a column pin so it's inactive state is HIGH.
-    pd2_set_led_mode();
-
-
-    // Restore the previous CPU status and interrupt state.
-    SREG = old_sreg;
-}
 
 static void wait_for_simulation_step(void)
 {
@@ -572,13 +560,44 @@ int main()
         }
 
 #ifndef DISABLE_I2C
-        // Keep trying to initialize MPU6050 again
-        if (!mpu6050_is_connected())
+        // Check MPU6050 connection without timer interrupts disturbing I2C
+        uint8_t old_sreg = SREG;
+        cli();
+
+        if (!is_mpu6050_connected)
         {
-            mpu6050_init();
-            _delay_ms(50);
-            // Maybe blink a led here
-            continue; // Keep trying to connect
+            // Full init on every attempt, and only then start running
+            bool ok = mpu6050_init();
+            SREG = old_sreg;
+
+            if (!ok)
+            {
+                set_leds_off(); // To be safe no LED was left on
+
+                set_led_on(15, 15);  _delay_ms(250);
+                set_led_off(15, 15); _delay_ms(250);
+                continue;
+            }
+
+            is_mpu6050_connected = true;
+            simulation_init();
+            update_brightness();
+            start_led_timer();
+            start_sim_timer();
+        }
+        else
+        {
+            bool connected = mpu6050_is_connected();
+            SREG = old_sreg;
+
+            if (!connected)
+            {
+                stop_led_timer();
+                stop_sim_timer();
+                set_leds_off();
+                is_mpu6050_connected = false;
+                continue;
+            }
         }
 #endif
         wait_for_simulation_step();
