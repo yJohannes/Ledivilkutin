@@ -31,7 +31,7 @@
 #define SIM_PARTICLE_COUNT              SIM_DEFAULT_PARTICLE_COUNT
 
 // Tweakable parameters
-#define SIM_DEFAULT_FPS                         19u
+#define SIM_DEFAULT_FPS                         20u
 #define SIM_DEFAULT_PARTICLE_RADIUS             32u
 #define SIM_DEFAULT_PARTICLE_MIN_DISTANCE       16   // Distance before particles are pushed apart
 #define SIM_DEFAULT_PARTICLE_MAX_DISPLACEMENT   16   // Maximum dx in Verlet integration
