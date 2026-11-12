@@ -66,13 +66,19 @@ void init_led_pins(void)
 }
 
 
-void set_led_rows_low(void)
+void set_leds_off(void)
 {
-    PORTA &= ~ROW_MASK_A;
-    PORTB &= ~ROW_MASK_B;
-    PORTC &= ~ROW_MASK_C;
-    PORTD &= ~ROW_MASK_D;
-    PORTE &= ~ROW_MASK_E;
+    PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
+    PORTB = (PORTB & ~LED_MASK_B) | COL_MASK_B;
+    PORTC = (PORTC & ~LED_MASK_C) | COL_MASK_C;
+    PORTD = (PORTD & ~LED_MASK_D) | COL_MASK_D;
+    PORTE = (PORTE & ~LED_MASK_E) | COL_MASK_E;
+
+    // PORTA &= ~ROW_MASK_A;
+    // PORTB &= ~ROW_MASK_B;
+    // PORTC &= ~ROW_MASK_C;
+    // PORTD &= ~ROW_MASK_D;
+    // PORTE &= ~ROW_MASK_E;
 }
 
 

@@ -104,7 +104,7 @@ extern uint8_t brightness[64];
 
 
 void init_led_pins(void);
-void set_led_rows_low(void);
+void set_leds_off(void);
 
 static inline uint8_t get_brightness(uint8_t i)
 {

@@ -65,7 +65,7 @@ void init_button_interrupt(void)
 }
 
 
-/// @warning set_led_rows_low() MUST BE CALLED FIRST!!!!!!!!
+/// @warning set_leds_off() MUST BE CALLED FIRST!!!!!!!!
 void pd2_set_button_mode(void)
 {
     // Configure as input
@@ -94,7 +94,7 @@ void enable_button_interrupt(void)
     // First make sure all LED rows are inactive.
     // This prevents current flowing through the matrix
     // while PD2 is temporarily configured as an input.
-    set_led_rows_low();
+    set_leds_off();
 
     pd2_set_button_mode();
 
@@ -393,63 +393,14 @@ static void ledivilkutin_initialize(void)
     _delay_ms(500);
     set_led_off(1, 1);
 
-
-    // // Set new ON
-    // *ROW_PINS[0].port |= ROW_PINS[0].mask;
-    // *COL_PINS[0].port &= ~COL_PINS[0].mask;
-
-    // _delay_ms(250);
-
-    // // Set OFF
-    // *ROW_PINS[0].port &= ~ROW_PINS[0].mask;
-    // *COL_PINS[0].port |= COL_PINS[0].mask;
-
-
-    // // Set new ON
-    // *ROW_PINS[1].port |= ROW_PINS[1].mask;
-    // *COL_PINS[1].port &= ~COL_PINS[1].mask;
-
-    // _delay_ms(250);
-
-    // // Set OFF
-    // *ROW_PINS[1].port &= ~ROW_PINS[1].mask;
-    // *COL_PINS[1].port |= COL_PINS[1].mask;
-
     // Wait for button press before starting I2C over pins PB5 & PB6
     wait_for_button_interrupt();
 
     _delay_ms(50); // Debounce
     wait_for_button_release();
 
-    // Set new ON
-    // *ROW_PINS[2].port |= ROW_PINS[2].mask;
-    // *COL_PINS[2].port &= ~COL_PINS[2].mask;
-
-    // _delay_ms(250);
-
-    // // Set OFF
-    // *ROW_PINS[2].port &= ~ROW_PINS[2].mask;
-    // *COL_PINS[2].port |= COL_PINS[2].mask;
-
-
     disable_button_interrupt();
 
-
-    // volatile bool grr = true;
-    // while (grr)
-    // {
-    //     // Set new ON
-    //     *ROW_PINS[15].port |= ROW_PINS[15].mask;
-    //     *COL_PINS[0].port &= ~COL_PINS[0].mask;
-
-    //     _delay_ms(500);
-
-    //     // // Set OFF
-    //     *ROW_PINS[15].port &= ~ROW_PINS[15].mask;
-    //     *COL_PINS[0].port |= COL_PINS[0].mask;
-
-    //     _delay_ms(500);
-    // }
 
     // Init I2C only after this to allow removing the programming device.
 #ifndef DISABLE_I2C
@@ -468,7 +419,7 @@ static void ledivilkutin_initialize(void)
     // Set to prevent infinite loop in LED interrupt.
     update_brightness();
 
-    init_led_pins();
+    // init_led_pins();
     init_led_timer();
     start_led_timer();
     sei();
@@ -482,7 +433,7 @@ static void ledivilkutin_sleep(void)
     stop_sim_timer();
 
     // Reset LED pins to inactive states.
-    init_led_pins();
+    set_leds_off();
 
 #ifndef DISABLE_I2C
     // Failure is acceptable: the sensor may already be disconnected.
