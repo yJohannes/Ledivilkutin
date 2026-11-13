@@ -80,7 +80,7 @@ void pd2_set_led_mode(void)
 }
 
 
-void enable_button_interrupt(void)
+void enable_int0(void)
 {
     uint8_t old_sreg = SREG;
     cli();
@@ -109,7 +109,7 @@ void enable_button_interrupt(void)
 }
 
 
-void disable_button_interrupt(void)
+void disable_int0(void)
 {
     // Disable INT0.
     GICR &= ~(1 << INT0);
@@ -122,7 +122,7 @@ void disable_button_interrupt(void)
 }
 
 
-static void wait_for_button_release(void)
+static void wait_for_release(void)
 {
     while (1)
     {
@@ -142,7 +142,7 @@ static void wait_for_button_release(void)
 }
 
 
-void wait_for_button_interrupt(void)
+void button_wait_for_interrupt(void)
 {
     // Disable global interrupts to prevent an ISR from executing
     // while we check the button flag and prepare to sleep.
@@ -291,7 +291,7 @@ ISR(TIMER1_COMPA_vect)
 #define TIMER1_CS_MASK ((1 << CS12) | (1 << CS11) | (1 << CS10))
 
 /// @brief Initialize simulation step timer @ 19 Hz
-void init_sim_timer(void)
+void sim_timer_init(void)
 {
 
     // Stop Timer1 while configuring
@@ -307,7 +307,7 @@ void init_sim_timer(void)
 }
 
 
-static void start_sim_timer(void)
+static void sim_timer_start(void)
 {
     TCNT1 = 0;              // Reset counter
     TIFR = (1 << OCF1A);    // Clear pending compare flag
@@ -319,7 +319,7 @@ static void start_sim_timer(void)
 }
 
 
-static void stop_sim_timer(void)
+static void sim_timer_stop(void)
 {
     TCCR1B &= ~TIMER1_CS_MASK;    // Stop timer clock
     TIMSK &= ~(1 << OCIE1A);      // Disable compare interrupt
@@ -347,8 +347,8 @@ static void ledivilkutin_initialize(void)
 
     cli();
     simulation_init();
-    init_sim_timer();
-    start_sim_timer();
+    sim_timer_init();
+    sim_timer_start();
 
     // Set to prevent infinite loop in LED interrupt.
     leds_update_brightness();
@@ -364,7 +364,7 @@ static void ledivilkutin_initialize(void)
 static void ledivilkutin_sleep(void)
 {
     leds_stop_timer();
-    stop_sim_timer();
+    sim_timer_stop();
 
     simulation_init();
 
@@ -372,7 +372,7 @@ static void ledivilkutin_sleep(void)
     leds_update_brightness();
 
     leds_start_timer();
-    start_sim_timer();
+    sim_timer_start();
 }
 
 static void ledivilkutin_update_acceleration(void)
@@ -423,7 +423,7 @@ static void ledivilkutin_check_button(void)
     if (!running)
     {
         _delay_ms(50);
-        wait_for_button_release();
+        wait_for_release();
     }
 
     // Restore PD2 as an LED output.

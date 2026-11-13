@@ -204,9 +204,6 @@ void leds_stop_timer(void)
     TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
 }
 
-#undef TIMER0_PRESCALER_BITS
-#undef TIMER0_CS_MASK
-
 
 // ==================================================================
 // LED INTERRUPT

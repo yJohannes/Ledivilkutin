@@ -13,7 +13,8 @@ mkdir "%OUT%"
 
 REM Copy main.c
 copy "%ROOT%atmega8515\src\main.c" "%OUT%\"
-copy "%ROOT%atmega8515\src\globals.h" "%OUT%\"
+copy "%ROOT%atmega8515\src\button.c" "%OUT%\"
+copy "%ROOT%atmega8515\src\button.h" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.c" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.h" "%OUT%\"
 
@@ -76,6 +77,7 @@ avr-gcc -mmcu=atmega8515 ^
     -DSIM_FRICTION_ENABLED ^
     -DSIM_USE_POINTER_ITERATION ^
     main.c ^
+    button.c ^
     leds.c ^
     i2c.c ^
     mpu6050.c ^

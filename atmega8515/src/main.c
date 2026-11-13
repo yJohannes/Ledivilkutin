@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -13,159 +12,17 @@
 #include "mpu6050.h"
 #include "sim.h"
 #include "leds.h"
+#include "button.h"
 #include "sim_config.h"
 
 
 // #define DISABLE_I2C
 
-volatile bool button_pressed = false;
-bool running = false;
 bool is_mpu6050_connected = false;
 
 /// @brief Flag to simulate a step set by timer @ 19 Hz
 // volatile bool simulate_step = false;
 volatile uint8_t pending_steps = 0;
-
-
-// ============================================================================
-// BUTTON INTERRUPT
-// ============================================================================
-
-#define BUTTON_PIN PD2
-
-
-// (INT0) PD2 / External Interrupt Request 0
-// ONLY TO BE USED WHEN POWERED DOWN
-ISR(INT0_vect)
-{
-    // Disable INT0 to prevent additional interrupts during debouncing
-    GICR &= ~(1 << INT0);
-
-    button_pressed = true;
-}
-
-void init_button_interrupt(void)
-{
-    // Disable INT0 while configuring it.
-    GICR &= ~(1 << INT0);
-
-    // Configure INT0 for falling-edge triggering.
-    // ISC01 = 1, ISC00 = 0 is Falling edge
-    // MCUCR |= (1 << ISC01);
-    // MCUCR &= ~(1 << ISC00);
-
-    // INT0: low-level triggering
-    MCUCR &= ~(1 << ISC01);
-    MCUCR &= ~(1 << ISC00);
-
-
-    // Clear any pending interrupt flag.
-    GIFR = (1 << INTF0);
-}
-
-
-/// @warning leds_set_all_off() MUST BE CALLED FIRST!!!!!!!!
-void pd2_set_button_mode(void)
-{
-    // Configure as input
-    DDRD &= ~(1 << BUTTON_PIN);
-
-    // Enable internal pull-up
-    PORTD |= (1 << BUTTON_PIN);
-}
-
-
-void pd2_set_led_mode(void)
-{
-    // Set output latch HIGH (LED inactive)
-    PORTD |= (1 << BUTTON_PIN);
-
-    // Configure as output
-    DDRD |= (1 << BUTTON_PIN);
-}
-
-
-void enable_button_interrupt(void)
-{
-    uint8_t old_sreg = SREG;
-    cli();
-
-    // First make sure all LED rows are inactive.
-    // This prevents current flowing through the matrix
-    // while PD2 is temporarily configured as an input.
-    leds_set_all_off();
-
-    pd2_set_button_mode();
-
-    // Reset the event flag and clear any pending interrupt.
-    button_pressed = false;
-    GIFR = (1 << INTF0);
-
-    // Handle a button that is already pressed.
-    if (!(PIND & (1 << BUTTON_PIN)))
-    {
-        button_pressed = true;
-    }
-
-    // Enable INT0.
-    GICR |= (1 << INT0);
-
-    SREG = old_sreg;
-}
-
-
-void disable_button_interrupt(void)
-{
-    // Disable INT0.
-    GICR &= ~(1 << INT0);
-
-    // Clear any pending interrupt flag.
-    GIFR = (1 << INTF0);
-
-    // Restore PD2 as an LED output, inactive HIGH.
-    pd2_set_led_mode();
-}
-
-
-static void wait_for_button_release(void)
-{
-    while (1)
-    {
-        // Wait until the button is released.
-        while (!(PIND & (1 << BUTTON_PIN)))
-        {
-        }
-
-        // Debounce the release.
-        _delay_ms(50);
-
-        if (PIND & (1 << BUTTON_PIN))
-        {
-            break;
-        }
-    }
-}
-
-void wait_for_button_interrupt(void)
-{
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-
-    cli();
-
-    while (!button_pressed)
-    {
-        sleep_enable();
-
-        sei();
-        sleep_cpu();
-
-        sleep_disable();
-
-        cli();
-    }
-
-    sei();
-}
 
 
 // ============================================================================
@@ -228,110 +85,57 @@ static void stop_sim_timer(void)
 }
 
 
-// ============================================================================
-// MAIN
-// ============================================================================
-
-static void ledivilkutin_check_button(void)
-{
-    uint8_t old_sreg = SREG;
-    cli();  // Stop interruptions during this check
-
-    // Make sure all LED rows are inactive.
-    leds_set_all_off();
-
-    // Switch PD2 to input with pull-up.
-    pd2_set_button_mode();
-
-    _delay_us(10);
-
-    // Button pressed = LOW
-    running = (PIND & (1 << BUTTON_PIN));
-
-    if (!running)
-    {
-        _delay_ms(50);
-        wait_for_button_release();
-    }
-
-    // Restore PD2 as an LED output.
-    // PD2 is a column pin so it's inactive state is HIGH.
-    pd2_set_led_mode();
-
-
-    // Restore the previous CPU status and interrupt state.
-    SREG = old_sreg;
-}
+/* ====================================================================
+ * Main
+ * ==================================================================*/
 
 
 static void ledivilkutin_initialize(void)
 {
-    // pd2_set_button_mode();
-    leds_init_pins(); // For debug
+    leds_init_pins();
 
-    init_button_interrupt();
-    enable_button_interrupt();
+    // Blink to indicate startup
+    leds_set_led_on(0, 0);  _delay_ms(500);
+    leds_set_led_off(0, 0); _delay_ms(500);
 
-    sei(); // Prolly be redundant
-
-    /// @warning DO NOT TOGGLE #define PIN_COL_11  PD2
-    /// SINCE THE BUTTON WONT OBVIOUSLY WORK
-
-    leds_set_led_on(0, 0);
-    _delay_ms(500);
-    leds_set_led_off(0, 0);
-    _delay_ms(500);
+    button_init();
 
     // Wait for button press before starting I2C over pins PB5 & PB6
-    wait_for_button_interrupt();
+    // to allow removing the programming device.
+    button_sleep_until_press();
 
-    _delay_ms(50); // Debounce
-    wait_for_button_release();
-
-    disable_button_interrupt();
-
-
-    // Init I2C only after this to allow removing the programming device.
 #ifndef DISABLE_I2C
     i2c_init();
     while (!mpu6050_init())
     {
-        leds_set_led_on(15, 15);
-        _delay_ms(250);
-        leds_set_led_off(15, 15);
-        _delay_ms(250);
+        leds_set_led_on(15, 15);  _delay_ms(250);
+        leds_set_led_off(15, 15); _delay_ms(250);
 
-
-        enable_button_interrupt();
-
-        // ledivilkutin_check_button();
-
-        disable_button_interrupt();
+        if (button_poll_press())
+        {
+            button_sleep_until_press();
+        }
     }
 
     is_mpu6050_connected = true;
-#endif
+#endif // DISABLE_I2C
 
     cli();
     simulation_init();
-    init_sim_timer();
-    start_sim_timer();
+    sim_timer_init();
+    sim_timer_start();
 
     // Set to prevent infinite loop in LED interrupt.
     leds_update_brightness();
 
-    // leds_init_pins();
     leds_init_timer();
     leds_start_timer();
     sei();
-
-    running = true; // Remember to start simulation
 }
 
 static void ledivilkutin_sleep(void)
 {
-    leds_stop_timer();
-    stop_sim_timer();
+    leds_stop_timer(); sim_timer_stop();
 
     // Reset LED pins to inactive states.
     leds_set_all_off();
@@ -342,30 +146,19 @@ static void ledivilkutin_sleep(void)
 
     // Ensure I2C pins are released for possible programming.
     i2c_release_pins();
-#endif
+#endif // DISABLE_I2C
 
-    enable_button_interrupt();
-
-    // Sleep until interrupt
-    wait_for_button_interrupt();
-
-    // Debounce
-    _delay_ms(50);
-    wait_for_button_release();
-
-    disable_button_interrupt();
+    button_sleep_until_press();
 
 #ifndef DISABLE_I2C
-    // If it is disconnected, the next connectivity check handles recovery.
+    // If disconnected, next connectivity check handles recovery.
     mpu6050_set_sleep(false);
-#endif
+#endif // DISABLE_I2C
     simulation_init();
 
-    // Set to prevent infinite loop in LED interrupt.
-    leds_update_brightness();
+    leds_update_brightness(); // Prevent infinite loop in LED interrupt.
 
-    leds_start_timer();
-    start_sim_timer();
+    leds_start_timer(); sim_timer_start();
 }
 
 static void ledivilkutin_update_acceleration(void)
@@ -443,7 +236,7 @@ int main()
 
     while (1)
     {
-        ledivilkutin_check_button();
+        bool running = !button_poll_press();
 
         if (!running)
         {
@@ -464,7 +257,7 @@ int main()
 
             if (!ok)
             {
-                leds_set_all_off(); // To be safe no LED was left on
+                leds_set_all_off(); // Ensure no LED was left on
 
                 leds_set_led_on(15, 15);  _delay_ms(250);
                 leds_set_led_off(15, 15); _delay_ms(250);
@@ -474,8 +267,8 @@ int main()
             is_mpu6050_connected = true;
             simulation_init();
             leds_update_brightness();
-            leds_start_timer();
-            start_sim_timer();
+
+            leds_start_timer(); sim_timer_start();
         }
         else
         {
@@ -484,18 +277,17 @@ int main()
 
             if (!connected)
             {
-                leds_stop_timer();
-                stop_sim_timer();
+                leds_stop_timer(); sim_timer_stop();
                 leds_set_all_off();
                 is_mpu6050_connected = false;
                 continue;
             }
         }
-#endif
+#endif // DISABLE_I2C
         wait_for_simulation_step();
 #ifndef DISABLE_I2C
         ledivilkutin_update_acceleration();
-#endif
+#endif // DISABLE_I2C
         simulation_step();
         leds_update_brightness();
     }
