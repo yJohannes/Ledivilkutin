@@ -493,7 +493,8 @@ static void ledivilkutin_update_acceleration(void)
             uint8_t old_sreg = SREG;
             cli();
 
-            if (!mpu6050_read_accel_xy_i8(&a.x, &a.y))
+            // SWAP X- AND Y-AXIS
+            if (!mpu6050_read_accel_xy_i8(&a.y, &a.x))
             {
                 // On failure set acceleration to zero and if this was
                 // caused by MPU6050 disconnecting the code above will
@@ -501,6 +502,9 @@ static void ledivilkutin_update_acceleration(void)
                 a.x = 0;
                 a.y = 0;
             }
+
+            // Change x-axis direction
+            a.x = -a.x;
 
             SREG = old_sreg;
         }
