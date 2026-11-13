@@ -12,6 +12,39 @@
 #include "sim_config.h"
 
 
+/**
+ * @brief Row and column masks based on the physical
+ * pin configurations.
+ */
+#define ROW_MASK_A 0b11111000
+#define COL_MASK_A 0b00000111
+
+#define ROW_MASK_B 0b00000000
+#define COL_MASK_B 0b00011111
+
+#define ROW_MASK_C 0b11111111
+#define COL_MASK_C 0b00000000
+
+#define ROW_MASK_D 0b00000000
+#define COL_MASK_D 0b11111111
+
+#define ROW_MASK_E 0b00000111
+#define COL_MASK_E 0b00000000
+
+#define LED_MASK_A (ROW_MASK_A | COL_MASK_A)
+#define LED_MASK_B (ROW_MASK_B | COL_MASK_B)
+#define LED_MASK_C (ROW_MASK_C | COL_MASK_C)
+#define LED_MASK_D (ROW_MASK_D | COL_MASK_D)
+#define LED_MASK_E (ROW_MASK_E | COL_MASK_E)
+
+#define LED_ROW(led) ((led) >> 4)
+#define LED_COL(led) ((led) & 0x0F)
+
+/// @see https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
+#define TIMER0_PRESCALER_BITS (1 << CS01) // Prescaler: 8
+#define TIMER0_CS_MASK ((1 << CS02) | (1 << CS01) | (1 << CS00))
+
+
 #ifdef LEDS_DOUBLE_BUFFER
 uint8_t buf_a[64];
 uint8_t buf_b[64];
@@ -22,13 +55,13 @@ uint8_t brightness[64];
 #endif // LEDS_DOUBLE_BUFFER
 
 
-uint8_t leds_row_tbl[48] = {
+uint8_t row_tbl[48] = {
     0x08,0x10,0x20,0x40,0x80, 0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
     0,0,0,0,0,0,0,0, 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
     0,0,0,0,0, 0x01,0x02,0x04, 0,0,0,0,0,0,0,0                        // PORTE
 };
 
-uint8_t leds_col_tbl[48] = {
+uint8_t col_tbl[48] = {
     0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
     0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
     0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
@@ -37,24 +70,93 @@ uint8_t leds_col_tbl[48] = {
     0xFF,0xF7,0xFF,0xFB,0xFF,0xFD,0xFF,0xFE                           // PORTD
 };
 
-
 // No const so they stay in SRAM
-static uint8_t leds_brightness_masks[4] = {
+static uint8_t brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
 
-static uint8_t leds_brightness_increments[4] = {
+static uint8_t brightness_increments[4] = {
     0x01, 0x04, 0x10, 0x40
 };
 
 // 0 is a dummy value for correct indexing.
-static uint8_t leds_brightness_ocr0[] = {
+static uint8_t brightness_ocr0[] = {
     // 0, 64, 99, 199 // old values
     0, 49, 84, 184
 };
 
-volatile uint8_t leds_current_led = 0;
+static volatile uint8_t current_led = 0;
 
+
+/* ====================================================================
+ * LED interrupt
+ * ==================================================================== */
+
+ISR(TIMER0_COMP_vect)
+{
+    uint8_t led = current_led;
+    uint8_t b;
+
+    // Find next LED to turn on. Skip empty bytes = 4 LEDs, etc.
+    for (;;) {
+        led++;                              // wraps 255 -> 0
+        uint8_t v = brightness[led >> 2];
+        if (v == 0) { led |= 3; continue; } // whole group of 4 is off, skip it
+        if (led & 2) v >>= 4;               // unsigned: no asr/ror loop
+        if (led & 1) v >>= 2;
+        b = v & 3;
+        if (b) break;
+    }
+    current_led = led;
+
+    uint8_t *z, *y;
+    uint8_t t0, t1;
+
+    asm volatile(
+        // Z = &row_tbl[led >> 4]
+        "mov  %A0, %4              \n\t"
+        "swap %A0                  \n\t"
+        "andi %A0, 0x0F            \n\t"
+        "ldi  %B0, 0               \n\t"
+        "subi %A0, lo8(-(%[rt]))   \n\t"
+        "sbci %B0, hi8(-(%[rt]))   \n\t"
+        // Y = &col_tbl[led & 15]
+        "mov  %A1, %4              \n\t"
+        "andi %A1, 0x0F            \n\t"
+        "ldi  %B1, 0               \n\t"
+        "subi %A1, lo8(-(%[ct]))   \n\t"
+        "sbci %B1, hi8(-(%[ct]))   \n\t"
+        // port writes
+        "ld   %2, Z                \n\t"
+        "ld   %3, Y                \n\t"
+        "or   %2, %3               \n\t"
+        "out  %[pa], %2            \n\t"
+        "in   %2, %[pb]            \n\t"
+        "andi %2, 0xE0             \n\t"   // keep PB7..PB5
+        "ldd  %3, Y+16             \n\t"
+        "or   %2, %3               \n\t"
+        "out  %[pb], %2            \n\t"
+        "ldd  %2, Z+16             \n\t"
+        "out  %[pc], %2            \n\t"
+        "ldd  %2, Y+32             \n\t"
+        "out  %[pd], %2            \n\t"
+        "ldd  %2, Z+32             \n\t"
+        "out  %[pe], %2            \n\t"
+        : "=&z"(z), "=&y"(y), "=&d"(t0), "=&d"(t1)
+        : "r"(led),
+          [rt] "i"(row_tbl), [ct] "i"(col_tbl),
+          [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
+          [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
+          [pe] "I"(_SFR_IO_ADDR(PORTE))
+        : "cc");
+
+    OCR0 = brightness_ocr0[b];
+}
+
+
+/* ====================================================================
+ * Public API
+ * ==================================================================*/
 
 void leds_init_pins(void)
 {
@@ -79,6 +181,36 @@ void leds_init_pins(void)
 }
 
 
+void leds_init_timer(void)
+{
+    TCCR0 = 0;      // Stop timer while configuring it
+    TCNT0 = 0;      // Reset counter
+    OCR0 = 199;
+    TCCR0 = (1 << WGM01);   // CTC mode, timer stopped
+
+    TIMSK &= ~(1 << OCIE0);      // Disable compare-match interrupt
+}
+
+
+void leds_start_timer(void)
+{
+    TCNT0 = 0;             // Reset counter
+    TIFR = (1 << OCF0);    // Clear pending compare flag
+
+    TIMSK |= (1 << OCIE0);        // Enable compare interrupt
+
+    // Clear scaler bits and add new
+    TCCR0 = (TCCR0 & ~TIMER0_CS_MASK) | TIMER0_PRESCALER_BITS;
+}
+
+
+void leds_stop_timer(void)
+{
+    TIMSK &= ~(1 << OCIE0);     // Disable compare-match interrupt
+    TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
+}
+
+
 void leds_set_all_off(void)
 {
     PORTA = (PORTA & ~LED_MASK_A) | COL_MASK_A;
@@ -99,11 +231,11 @@ void leds_add_brightness(uint8_t led_idx)
 
     uint8_t pos = led_idx & 3;
 
-    uint8_t mask = leds_brightness_masks[pos];
+    uint8_t mask = brightness_masks[pos];
 
     // Perform magic
     if ((*pt & mask) != mask)
-        *pt += leds_brightness_increments[pos];
+        *pt += brightness_increments[pos];
 }
 
 
@@ -148,7 +280,7 @@ void leds_update_brightness(void)
     cli();
 
     // Ensure LED is off before restoring interrupts.
-    leds_set_led_off(LED_COL(leds_current_led), LED_ROW(leds_current_led));
+    leds_set_led_off(LED_COL(current_led), LED_ROW(current_led));
 
     // Clear the framebuffer.
     memset(&brightness[0], 0, sizeof(brightness));
@@ -164,143 +296,14 @@ void leds_update_brightness(void)
 
     // Turn back on for the brief moment to hopefully
     // prevent flicker even slightly.
-    leds_set_led_on(LED_COL(leds_current_led), LED_ROW(leds_current_led));
+    leds_set_led_on(LED_COL(current_led), LED_ROW(current_led));
 
     SREG = sreg;
 }
 #endif // LEDS_DOUBLE_BUFFER
 
 
-// https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
-#define TIMER0_PRESCALER_BITS (1 << CS01) // Prescaler: 8
-#define TIMER0_CS_MASK ((1 << CS02) | (1 << CS01) | (1 << CS00))
-
-
-void leds_init_timer(void)
-{
-    TCCR0 = 0;      // Stop timer while configuring it
-    TCNT0 = 0;      // Reset counter
-    OCR0 = 199;
-    TCCR0 = (1 << WGM01);   // CTC mode, timer stopped
-
-    TIMSK &= ~(1 << OCIE0);      // Disable compare-match interrupt
-}
-
-
-void leds_start_timer(void)
-{
-    TCNT0 = 0;             // Reset counter
-    TIFR = (1 << OCF0);    // Clear pending compare flag
-
-    TIMSK |= (1 << OCIE0);        // Enable compare interrupt
-
-    // Clear scaler bits and add new
-    TCCR0 = (TCCR0 & ~TIMER0_CS_MASK) | TIMER0_PRESCALER_BITS;
-}
-
-
-void leds_stop_timer(void)
-{
-    TIMSK &= ~(1 << OCIE0);     // Disable compare-match interrupt
-    TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
-}
-
-
-// ==================================================================
-// LED INTERRUPT
-// ==================================================================
-
-ISR(TIMER0_COMP_vect)
-{
-    uint8_t led = leds_current_led;
-    uint8_t b;
-
-    // Find next LED to turn on. Skip empty bytes = 4 LEDs, etc.
-    for (;;) {
-        led++;                              // wraps 255 -> 0
-        uint8_t v = brightness[led >> 2];
-        if (v == 0) { led |= 3; continue; } // whole group of 4 is off, skip it
-        if (led & 2) v >>= 4;               // unsigned: no asr/ror loop
-        if (led & 1) v >>= 2;
-        b = v & 3;
-        if (b) break;
-    }
-    leds_current_led = led;
-
-    uint8_t *z, *y;
-    uint8_t t0, t1;
-
-    asm volatile(
-        // Z = &leds_row_tbl[led >> 4]
-        "mov  %A0, %4              \n\t"
-        "swap %A0                  \n\t"
-        "andi %A0, 0x0F            \n\t"
-        "ldi  %B0, 0               \n\t"
-        "subi %A0, lo8(-(%[rt]))   \n\t"
-        "sbci %B0, hi8(-(%[rt]))   \n\t"
-        // Y = &leds_col_tbl[led & 15]
-        "mov  %A1, %4              \n\t"
-        "andi %A1, 0x0F            \n\t"
-        "ldi  %B1, 0               \n\t"
-        "subi %A1, lo8(-(%[ct]))   \n\t"
-        "sbci %B1, hi8(-(%[ct]))   \n\t"
-        // port writes
-        "ld   %2, Z                \n\t"
-        "ld   %3, Y                \n\t"
-        "or   %2, %3               \n\t"
-        "out  %[pa], %2            \n\t"
-        "in   %2, %[pb]            \n\t"
-        "andi %2, 0xE0             \n\t"   // keep PB7..PB5
-        "ldd  %3, Y+16             \n\t"
-        "or   %2, %3               \n\t"
-        "out  %[pb], %2            \n\t"
-        "ldd  %2, Z+16             \n\t"
-        "out  %[pc], %2            \n\t"
-        "ldd  %2, Y+32             \n\t"
-        "out  %[pd], %2            \n\t"
-        "ldd  %2, Z+32             \n\t"
-        "out  %[pe], %2            \n\t"
-        : "=&z"(z), "=&y"(y), "=&d"(t0), "=&d"(t1)
-        : "r"(led),
-          [rt] "i"(leds_row_tbl), [ct] "i"(leds_col_tbl),
-          [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
-          [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
-          [pe] "I"(_SFR_IO_ADDR(PORTE))
-        : "cc");
-
-    OCR0 = leds_brightness_ocr0[b];
-}
-
-
-
-/**
- * @brief Junkyard
- */
-
-
-/*
-
-void leds_add_brightness(uint8_t i)
-{
-    uint8_t shift = (i & 3) << 1;
-    // uint8_t mask = 3 << shift;
-
-    uint8_t value = (brightness[i >> 2] >> shift) & 3;
-
-    if (value < 3)
-    {
-        // value += amount;
-        ++value;
-        if (value > 3) value = 3;
-
-        brightness[i >> 2] =
-            (brightness[i >> 2] & ~(3 << shift)) | (value << shift);
-            // (brightness[i >> 2] & ~mask) | (value << shift);
-    }
-}
-
-
-
+#if ___________________
 #define PIN_ROW_0   PA3
 #define PIN_ROW_1   PA4
 #define PIN_ROW_2   PA5
@@ -334,17 +337,4 @@ void leds_add_brightness(uint8_t i)
 #define PIN_COL_13  PD1
 #define PIN_COL_14  PB4
 #define PIN_COL_15  PD0
-
-PORTA =  0b00000111; // PA0-2 columns HIGH, PA3-7 rows LOW
-PORTB &= 0b00011111; // PB0-4 columns HIGH
-PORTC =  0b00000000; // PC0-7 rows LOW
-PORTD =  0b11111111; // PD0-7 columns HIGH
-PORTE &= 0b00000000; // PE0-2 rows LOW
-
-DDRA = 0b11111111; // All PORT A pins are outputs
-DDRB |= 0b00011111; // PB0-PB4 outputs
-DDRC = 0b11111111; // All PORT C pins are outputs
-DDRD = 0b11111111; // All PORT D pins are outputs
-DDRE |= 0b00000111; // PE0-PE2 outputs
-
-*/
+#endif

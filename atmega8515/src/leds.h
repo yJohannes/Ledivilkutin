@@ -1,7 +1,7 @@
 /**
  * @file leds.h
  * @author Johannes Ylinen
- * @brief LED display controls.
+ * @brief LED controls.
  * @date 2026-11-13
  */
 
@@ -14,38 +14,8 @@
 #include <stdint.h>
 
 
-/**
- * @brief Row and column masks based on the physical
- * pin configurations.
- */
-#define ROW_MASK_A 0b11111000
-#define COL_MASK_A 0b00000111
-
-#define ROW_MASK_B 0b00000000
-#define COL_MASK_B 0b00011111
-
-#define ROW_MASK_C 0b11111111
-#define COL_MASK_C 0b00000000
-
-#define ROW_MASK_D 0b00000000
-#define COL_MASK_D 0b11111111
-
-#define ROW_MASK_E 0b00000111
-#define COL_MASK_E 0b00000000
-
-#define LED_MASK_A (ROW_MASK_A | COL_MASK_A)
-#define LED_MASK_B (ROW_MASK_B | COL_MASK_B)
-#define LED_MASK_C (ROW_MASK_C | COL_MASK_C)
-#define LED_MASK_D (ROW_MASK_D | COL_MASK_D)
-#define LED_MASK_E (ROW_MASK_E | COL_MASK_E)
-
-#define LED_ROW(led) ((led) >> 4)
-#define LED_COL(led) ((led) & 0x0F)
-
-
 extern uint8_t leds_row_tbl[48];
 extern uint8_t leds_col_tbl[48];
-
 
 // #define LEDS_DOUBLE_BUFFER
 #ifdef LEDS_DOUBLE_BUFFER
@@ -73,18 +43,23 @@ extern uint8_t brightness[64];
  */
 void leds_init_pins(void);
 
-/**
- * @brief Initializes LED timer without starting it.
- */
+/// @brief Initializes LED timer without starting it.
 void leds_init_timer(void);
 
 void leds_start_timer(void);
 void leds_stop_timer(void);
 
-/**
- * @brief Sets all leds off.
- */
+/// @brief Sets all leds off.
 void leds_set_all_off(void);
+
+/// @brief Increase the brightness level by one for LED at led_idx.
+void leds_add_brightness(uint8_t led_idx);
+
+/// @brief Adds a particle's contribution to the brightness map.
+void leds_add_particle(uint8_t x, uint8_t y);
+
+/// @brief Computes the LED brightness map based on particle positions.
+void leds_update_brightness(void);
 
 /**
  * @brief Get the brightness of a LED at led_idx.
@@ -98,22 +73,7 @@ uint8_t leds_get_brightness(uint8_t led_idx)
 }
 
 /**
- * @brief Increase the brightness level by one for LED at led_idx.
- */
-void leds_add_brightness(uint8_t led_idx);
-
-/**
- * @brief Adds a particle's contribution to the brightness map.
- */
-void leds_add_particle(uint8_t x, uint8_t y);
-
-/**
- * @brief Computes the LED brightness map based on particle positions.
- */
-void leds_update_brightness(void);
-
-/**
- * @brief Set a LED on. Clears previous LED on.
+ * @brief Set a LED on. Clears previous LED.
  *
  * ON: row HIGH, column LOW
  */
@@ -131,7 +91,7 @@ void leds_set_led_on(uint8_t x, uint8_t y)
 }
 
 /**
- * @brief Set a LED off. Clears previous LED on.
+ * @brief Set a LED off. Clears previous LED.
  *
  * OFF: row LOW, column HIGH
  */
