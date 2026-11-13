@@ -13,10 +13,15 @@ mkdir "%OUT%"
 
 REM Copy main.c
 copy "%ROOT%atmega8515\src\main.c" "%OUT%\"
+copy "%ROOT%atmega8515\src\ledivilkutin.c" "%OUT%\"
+copy "%ROOT%atmega8515\src\ledivilkutin.h" "%OUT%\"
+copy "%ROOT%atmega8515\src\ledivilkutin_config.h" "%OUT%\"
 copy "%ROOT%atmega8515\src\button.c" "%OUT%\"
 copy "%ROOT%atmega8515\src\button.h" "%OUT%\"
 copy "%ROOT%atmega8515\src\sim_timer.c" "%OUT%\"
 copy "%ROOT%atmega8515\src\sim_timer.h" "%OUT%\"
+copy "%ROOT%atmega8515\src\sensor.c" "%OUT%\"
+copy "%ROOT%atmega8515\src\sensor.h" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.c" "%OUT%\"
 copy "%ROOT%atmega8515\src\leds.h" "%OUT%\"
 
@@ -79,11 +84,13 @@ avr-gcc -mmcu=atmega8515 ^
     -DSIM_FRICTION_ENABLED ^
     -DSIM_USE_POINTER_ITERATION ^
     main.c ^
+    ledivilkutin.c ^
     button.c ^
     sim_timer.c ^
     leds.c ^
     i2c.c ^
     mpu6050.c ^
+    sensor.c ^
     sim_config.c ^
     int_arithmetic.c ^
     sim.c ^

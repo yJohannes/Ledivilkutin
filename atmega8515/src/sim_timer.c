@@ -67,7 +67,7 @@ void sim_timer_stop(void)
 
 void sim_timer_wait_step()
 {
-    while (1)
+    for (;;)
     {
         cli();
 
