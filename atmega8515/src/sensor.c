@@ -98,10 +98,9 @@ void sensor_update_acceleration(void)
 
 #else /* DISABLE_I2C: stubs */
 
-void sensor_begin(void) {}
 bool sensor_connect(void) { return true; }
 bool sensor_is_alive(void) { return true; }
-void sensor_power_down(void) {}
+void sensor_set_sleep(bool sleep) { (void)sleep; }
 void sensor_update_acceleration(void) { a.x = 0; a.y = 0; }
 
 #endif // DISABLE_I2C
