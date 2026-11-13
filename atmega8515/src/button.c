@@ -93,7 +93,7 @@ static void disable_int0(void)
  */
 static void wait_for_release(void)
 {
-    while (1)
+    for (;;)
     {
         while (pd2_is_low())
         {
