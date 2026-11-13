@@ -3,8 +3,6 @@
  * @author Johannes Ylinen
  * @date 2026-11-13
  *
- * @copyright Copyright (c) 2026
- *
  * The on/sleep button shares pin PD2 with an LED matrix column, so the
  * button can only be read while all LEDs are off and PD2 is an input.
  * This module hides that: callers never touch PD2 directly.
@@ -33,5 +31,6 @@ bool button_poll_press(void);
  * Returns after the press has been debounced and released.
  */
 void button_sleep_until_press(void);
+
 
 #endif // BUTTON_H

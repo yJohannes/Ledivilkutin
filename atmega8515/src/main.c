@@ -8,81 +8,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "button.h"
+#include "sim_timer.h"
+#include "leds.h"
 #include "i2c.h"
 #include "mpu6050.h"
 #include "sim.h"
-#include "leds.h"
-#include "button.h"
 #include "sim_config.h"
 
 
 // #define DISABLE_I2C
 
 bool is_mpu6050_connected = false;
-
-/// @brief Flag to simulate a step set by timer @ 19 Hz
-// volatile bool simulate_step = false;
-volatile uint8_t pending_steps = 0;
-
-
-// ============================================================================
-// SIMULATION INTERRUPT
-// ============================================================================
-
-
-ISR(TIMER1_COMPA_vect)
-{
-    // simulate_step = true;
-    ++pending_steps;
-}
-
-
-// https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
-// p. 93 Clock Select bits
-#define OCR1A_PS1024_20_HZ 389 // (8 × 10^(6))/(1024 × 20) − 1 = 389.625
-#define OCR1A_PS1024_19_HZ 410 // 8 000 000 / (1 024 × 19) − 1 = 410.184
-
-#define TIMER1_PRESCALER_BITS ((1 << CS12) | (1 << CS10)) // Prescaler 1024
-#define TIMER1_CS_MASK ((1 << CS12) | (1 << CS11) | (1 << CS10))
-
-/// @brief Initialize simulation step timer @ 19 Hz
-void init_sim_timer(void)
-{
-
-    // Stop Timer1 while configuring
-    TCCR1B = 0;
-    TCCR1A = 0;
-    TCNT1 = 0;      // Reset counter
-
-    // Compare value
-    OCR1A = OCR1A_PS1024_19_HZ;
-
-    TCCR1B = (1 << WGM12);      // CTC mode, timer stopped
-    TIMSK &= ~(1 << OCIE1A);    // Disable compare interrupt
-}
-
-
-static void start_sim_timer(void)
-{
-    TCNT1 = 0;              // Reset counter
-    TIFR = (1 << OCF1A);    // Clear pending compare flag
-
-    // Enable Timer1 compare-match A interrupt.
-    TIMSK |= (1 << OCIE1A);
-
-    TCCR1B = (TCCR1B & ~TIMER1_CS_MASK) | TIMER1_PRESCALER_BITS;
-}
-
-
-static void stop_sim_timer(void)
-{
-    TCCR1B &= ~TIMER1_CS_MASK;    // Stop timer clock
-    TIMSK &= ~(1 << OCIE1A);      // Disable compare interrupt
-
-    // Discard any pending simulation step
-    // simulate_step = false;
-    pending_steps = 0u;
-}
 
 
 /* ====================================================================
@@ -207,29 +144,6 @@ static void ledivilkutin_update_acceleration(void)
 }
 
 
-static void wait_for_simulation_step(void)
-{
-    while (1)
-    {
-        cli();
-
-        if (pending_steps > 0)
-        {
-            --pending_steps;
-            sei();
-            return;  // A step is ready. Start immediately.
-        }
-
-        set_sleep_mode(SLEEP_MODE_IDLE);
-        sleep_enable();
-
-        sei();
-        sleep_cpu();
-        sleep_disable();
-    }
-}
-
-
 int main()
 {
     ledivilkutin_initialize();
@@ -284,7 +198,9 @@ int main()
             }
         }
 #endif // DISABLE_I2C
-        wait_for_simulation_step();
+
+        sim_timer_wait_step();
+
 #ifndef DISABLE_I2C
         ledivilkutin_update_acceleration();
 #endif // DISABLE_I2C

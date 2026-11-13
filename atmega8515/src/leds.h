@@ -1,3 +1,10 @@
+/**
+ * @file leds.h
+ * @author Johannes Ylinen
+ * @brief LED display controls.
+ * @date 2026-11-13
+ */
+
 #ifndef LEDS_H
 #define LEDS_H
 
@@ -31,7 +38,6 @@
 #define LED_MASK_C (ROW_MASK_C | COL_MASK_C)
 #define LED_MASK_D (ROW_MASK_D | COL_MASK_D)
 #define LED_MASK_E (ROW_MASK_E | COL_MASK_E)
-
 
 #define LED_ROW(led) ((led) >> 4)
 #define LED_COL(led) ((led) & 0x0F)
