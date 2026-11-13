@@ -1,3 +1,9 @@
+/**
+ * @file sensor.h
+ * @author Johannes Ylinen
+ * @date 2026-11-14
+ */
+
 #include "sensor.h"
 
 #include <avr/interrupt.h>

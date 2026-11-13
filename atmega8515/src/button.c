@@ -1,3 +1,9 @@
+/**
+ * @file button.h
+ * @author Johannes Ylinen
+ * @date 2026-11-13
+ */
+
 #include "button.h"
 
 #include <avr/io.h>

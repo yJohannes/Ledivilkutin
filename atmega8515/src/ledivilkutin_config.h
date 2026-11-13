@@ -1,3 +1,10 @@
+/**
+ * @file ledivilkutin_config.h
+ * @author Johannes Ylinen
+ * @brief Toggle features on/off.
+ * @date 2026-11-14
+ */
+
 #ifndef LEDIVILKUTIN_CONFIG_H
 #define LEDIVILKUTIN_CONFIG_H
 

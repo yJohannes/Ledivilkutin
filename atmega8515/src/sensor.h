@@ -1,3 +1,10 @@
+/**
+ * @file sensor.h
+ * @author Johannes Ylinen
+ * @brief MPU6050 controls.
+ * @date 2026-11-14
+ */
+
 #ifndef SENSOR_H
 #define SENSOR_H
 

@@ -1,6 +1,8 @@
 /**
  * @file button.h
  * @author Johannes Ylinen
+ * @brief Button press handling and power-down sleep functionality
+ *        while managing the shared LED matrix pin.
  * @date 2026-11-13
  *
  * The on/sleep button shares pin PD2 with an LED matrix column, so the
@@ -14,16 +16,10 @@
 #include <stdbool.h>
 
 
-/**
- * @brief Configure INT0 (low-level trigger). Call once at startup.
- */
+/// @brief Configure INT0 (PD2) for low-level trigger. Call once at startup.
 void button_init(void);
 
-/**
- * @brief Poll the button. Safe to call while the LED timer is running.
- * If it is pressed: debounce, wait for release and return true
- * (the press is "consumed"). Takes ~10 us when not pressed.
- */
+/// @brief Poll the button. Safe to call while the LED timer is running.
 bool button_poll_press(void);
 
 /**

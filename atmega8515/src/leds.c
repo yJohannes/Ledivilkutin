@@ -1,3 +1,9 @@
+/**
+ * @file leds.h
+ * @author Johannes Ylinen
+ * @date 2026-11-13
+ */
+
 #include "leds.h"
 
 #include <avr/io.h>
@@ -12,10 +18,7 @@
 #include "sim_config.h"
 
 
-/**
- * @brief Row and column masks based on the physical
- * pin configurations.
- */
+// Row and column masks based on the physical pin configurations.
 #define ROW_MASK_A 0b11111000
 #define COL_MASK_A 0b00000111
 

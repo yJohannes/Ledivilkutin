@@ -1,7 +1,7 @@
 /**
  * @file sim_timer.h
  * @author Johannes Ylinen
- * @brief
+ * @brief Simulation timer control
  * @date 2026-11-13
  */
 
