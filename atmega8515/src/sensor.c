@@ -16,6 +16,7 @@
 #include "i2c.h"
 #include "mpu6050.h"
 
+/// @brief Maps acceleration to range, e.g. 3 -> [-16, 15]
 #define ACCELERATION_SHIFT 3
 
 
@@ -79,15 +80,14 @@ void sensor_update_acceleration(void)
                 a.y = 0;
             }
 
-            // Change y-axis direction
-            a.y = -a.y;
-
             SREG = old_sreg;
         }
 
-        // Divide by 8 to map acceleration to [-16, 15]
         a.x >>= ACCELERATION_SHIFT;
         a.y >>= ACCELERATION_SHIFT;
+
+        a.x = -a.x;
+        // a.y = -a.y;
     }
     else
     {
