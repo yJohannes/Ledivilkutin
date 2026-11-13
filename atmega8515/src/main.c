@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "globals.h"
 #include "i2c.h"
 #include "mpu6050.h"
 #include "sim.h"
@@ -26,7 +25,6 @@ bool is_mpu6050_connected = false;
 /// @brief Flag to simulate a step set by timer @ 19 Hz
 // volatile bool simulate_step = false;
 volatile uint8_t pending_steps = 0;
-volatile uint8_t current_led = 0;
 
 
 // ============================================================================
@@ -66,7 +64,7 @@ void init_button_interrupt(void)
 }
 
 
-/// @warning set_leds_off() MUST BE CALLED FIRST!!!!!!!!
+/// @warning leds_set_all_off() MUST BE CALLED FIRST!!!!!!!!
 void pd2_set_button_mode(void)
 {
     // Configure as input
@@ -95,7 +93,7 @@ void enable_button_interrupt(void)
     // First make sure all LED rows are inactive.
     // This prevents current flowing through the matrix
     // while PD2 is temporarily configured as an input.
-    set_leds_off();
+    leds_set_all_off();
 
     pd2_set_button_mode();
 
@@ -345,7 +343,7 @@ static void ledivilkutin_check_button(void)
     cli();  // Stop interruptions during this check
 
     // Make sure all LED rows are inactive.
-    set_leds_off();
+    leds_set_all_off();
 
     // Switch PD2 to input with pull-up.
     pd2_set_button_mode();
@@ -374,7 +372,7 @@ static void ledivilkutin_check_button(void)
 static void ledivilkutin_initialize(void)
 {
     // pd2_set_button_mode();
-    init_led_pins(); // For debug
+    leds_init_pins(); // For debug
 
     init_button_interrupt();
     enable_button_interrupt();
@@ -384,9 +382,9 @@ static void ledivilkutin_initialize(void)
     /// @warning DO NOT TOGGLE #define PIN_COL_11  PD2
     /// SINCE THE BUTTON WONT OBVIOUSLY WORK
 
-    set_led_on(0, 0);
+    leds_set_led_on(0, 0);
     _delay_ms(500);
-    set_led_off(0, 0);
+    leds_set_led_off(0, 0);
     _delay_ms(500);
 
     // Wait for button press before starting I2C over pins PB5 & PB6
@@ -403,9 +401,9 @@ static void ledivilkutin_initialize(void)
     i2c_init();
     while (!mpu6050_init())
     {
-        set_led_on(15, 15);
+        leds_set_led_on(15, 15);
         _delay_ms(250);
-        set_led_off(15, 15);
+        leds_set_led_off(15, 15);
         _delay_ms(250);
 
 
@@ -425,9 +423,9 @@ static void ledivilkutin_initialize(void)
     start_sim_timer();
 
     // Set to prevent infinite loop in LED interrupt.
-    update_brightness();
+    leds_update_brightness();
 
-    // init_led_pins();
+    // leds_init_pins();
     init_led_timer();
     start_led_timer();
     sei();
@@ -441,7 +439,7 @@ static void ledivilkutin_sleep(void)
     stop_sim_timer();
 
     // Reset LED pins to inactive states.
-    set_leds_off();
+    leds_set_all_off();
 
 #ifndef DISABLE_I2C
     // Failure is acceptable: the sensor may already be disconnected.
@@ -469,7 +467,7 @@ static void ledivilkutin_sleep(void)
     simulation_init();
 
     // Set to prevent infinite loop in LED interrupt.
-    update_brightness();
+    leds_update_brightness();
 
     start_led_timer();
     start_sim_timer();
@@ -571,16 +569,16 @@ int main()
 
             if (!ok)
             {
-                set_leds_off(); // To be safe no LED was left on
+                leds_set_all_off(); // To be safe no LED was left on
 
-                set_led_on(15, 15);  _delay_ms(250);
-                set_led_off(15, 15); _delay_ms(250);
+                leds_set_led_on(15, 15);  _delay_ms(250);
+                leds_set_led_off(15, 15); _delay_ms(250);
                 continue;
             }
 
             is_mpu6050_connected = true;
             simulation_init();
-            update_brightness();
+            leds_update_brightness();
             start_led_timer();
             start_sim_timer();
         }
@@ -593,7 +591,7 @@ int main()
             {
                 stop_led_timer();
                 stop_sim_timer();
-                set_leds_off();
+                leds_set_all_off();
                 is_mpu6050_connected = false;
                 continue;
             }
@@ -604,7 +602,7 @@ int main()
         ledivilkutin_update_acceleration();
 #endif
         simulation_step();
-        update_brightness();
+        leds_update_brightness();
     }
 }
 

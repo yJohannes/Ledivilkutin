@@ -21,7 +21,7 @@ volatile bool button_pressed = false;
 // volatile bool simulate_step = false;
 volatile uint8_t pending_steps = 0;
 
-volatile uint8_t current_led = 0;
+volatile uint8_t leds_current_led = 0;
 
 bool running = false;
 
@@ -179,14 +179,14 @@ void wait_for_button_interrupt(void)
 
 
 // 0 is a dummy value.
-static const uint8_t brightness_ocr[] = {
+static const uint8_t leds_brightness_ocr0[] = {
     0, 64, 99, 199
 };
 
 /// @brief Interrupt to update the LEDs.
 ISR(TIMER0_COMP_vect)
 {
-    uint8_t led = current_led; // volatile would make compiler have to reread.
+    uint8_t led = leds_current_led; // volatile would make compiler have to reread.
     uint8_t row = led >> 4;
     uint8_t col = led & 0x0F;
 
@@ -205,7 +205,7 @@ ISR(TIMER0_COMP_vect)
 
     // do
     // {
-    //     brightness = get_brightness(++current_led);
+    //     brightness = leds_get_brightness(++leds_current_led);
     // }
     // while (brightness == 0);
 
@@ -213,11 +213,11 @@ ISR(TIMER0_COMP_vect)
     do
     {
         // led wraps around perfectly since LED count is 256.
-        brightness = get_brightness(++led);
+        brightness = leds_get_brightness(++led);
     }
     while (brightness == 0);
 
-    current_led = led; // Remember to update
+    leds_current_led = led; // Remember to update
 
     row = led >> 4;
     col = led & 0x0F;
@@ -231,7 +231,7 @@ ISR(TIMER0_COMP_vect)
     // Should not cause flicker or weird stuff since
     // There's no way there's enough time for the timer to
     // pass over the OCR0 value causing a wait for overflow + count.
-    OCR0 = brightness_ocr[brightness];
+    OCR0 = leds_brightness_ocr0[brightness];
 }
 
 
@@ -351,9 +351,9 @@ static void ledivilkutin_initialize(void)
     start_sim_timer();
 
     // Set to prevent infinite loop in LED interrupt.
-    update_brightness();
+    leds_update_brightness();
 
-    init_led_pins();
+    leds_init_pins();
     init_led_timer();
     start_led_timer();
     sei();
@@ -369,7 +369,7 @@ static void ledivilkutin_sleep(void)
     simulation_init();
 
     // Set to prevent infinite loop in LED interrupt.
-    update_brightness();
+    leds_update_brightness();
 
     start_led_timer();
     start_sim_timer();
@@ -466,7 +466,7 @@ int main()
     while (1)
     {
 		asm volatile("nop");
-		
+
 
         if (!running)
         {
@@ -489,13 +489,13 @@ int main()
 
         ledivilkutin_update_acceleration();
         simulation_step();
-        update_brightness();
+        leds_update_brightness();
 
 //	    simulate_step = false;
-    
+
 		asm volatile("nop");
 	}
-	
+
 }
 
 

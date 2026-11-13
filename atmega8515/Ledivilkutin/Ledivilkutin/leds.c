@@ -51,7 +51,7 @@ const LedPin COL_PINS[LEDS_X] = {
 };
 
 
-void init_led_pins(void)
+void leds_init_pins(void)
 {
     // Set to prevent infinite loop in LED interrupt.
     brightness[0] = 1u;
@@ -100,29 +100,29 @@ void set_led_rows_low(void)
     PORTD &= ~ROW_MASK_D;
 }
 
-uint8_t brightness_masks[4] = {
+uint8_t leds_brightness_masks[4] = {
     0x03, 0x0C, 0x30, 0xC0
 };
 
-uint8_t brightness_increments[4] = {
+uint8_t leds_brightness_increments[4] = {
     0x01, 0x04, 0x10, 0x40
 };
 
 
 // Magic
-void add_brightness_v4(uint8_t i)
+void leds_add_brightness_v4(uint8_t i)
 {
     uint8_t *p = &brightness[i >> 2];
     uint8_t pos = i & 3;
 
-    uint8_t mask = brightness_masks[pos];
+    uint8_t mask = leds_brightness_masks[pos];
 
     if ((*p & mask) != mask)
-        *p += brightness_increments[pos];
+        *p += leds_brightness_increments[pos];
 }
 
-// void add_brightness(uint8_t i, uint8_t amount)
-void add_brightness(uint8_t i)
+// void leds_add_brightness(uint8_t i, uint8_t amount)
+void leds_add_brightness(uint8_t i)
 {
     uint8_t shift = (i & 3) << 1;
     // uint8_t mask = 3 << shift;
@@ -141,21 +141,21 @@ void add_brightness(uint8_t i)
     }
 }
 
-void process_particle(uint8_t x, uint8_t y)
+void leds_add_particle(uint8_t x, uint8_t y)
 {
     uint8_t i = y * LEDS_X + x;
 
     // Set max brightness
     brightness[i >> 2] |= 3 << ((i & 3) << 1);
 
-    if (x > 0)  add_brightness_v4(i - 1);
-    if (x < 15) add_brightness_v4(i + 1);
-    if (y > 0)  add_brightness_v4(i - 16);
-    if (y < 15) add_brightness_v4(i + 16);
+    if (x > 0)  leds_add_brightness_v4(i - 1);
+    if (x < 15) leds_add_brightness_v4(i + 1);
+    if (y > 0)  leds_add_brightness_v4(i - 16);
+    if (y < 15) leds_add_brightness_v4(i + 16);
 }
 
 
-void update_brightness(void)
+void leds_update_brightness(void)
 {
 	// Prevents infinite loop for the LED timer ISR.
 	brightness[0] = 1u;
@@ -168,7 +168,7 @@ void update_brightness(void)
 		uint8_t led_x = p[i].x >> 4;
 		uint8_t led_y = p[i].y >> 4;
 
-		process_particle(led_x, led_y);
+		leds_add_particle(led_x, led_y);
 	}
 
 	// Remove sentinel contribution.

@@ -78,19 +78,19 @@ extern const LedPin COL_PINS[LEDS_X];
 extern uint8_t brightness[64];
 
 
-void init_led_pins(void);
+void leds_init_pins(void);
 void set_led_rows_low(void);
 
-static inline uint8_t get_brightness(uint8_t i)
+static inline uint8_t leds_get_brightness(uint8_t i)
 {
     return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
 }
 
-void add_brightness(uint8_t i);
-void add_brightness_v4(uint8_t i);
-void process_particle(uint8_t x, uint8_t y);
+void leds_add_brightness(uint8_t i);
+void leds_add_brightness_v4(uint8_t i);
+void leds_add_particle(uint8_t x, uint8_t y);
 
 /// @brief Computes the LED brightness map based on particle positions.
-void update_brightness(void);
+void leds_update_brightness(void);
 
 #endif // LEDS_H

@@ -54,7 +54,7 @@ static uint8_t increments[4] = {
 };
 
 __attribute__((noinline, used))
-static void add_brightness_v4(uint8_t i)
+static void leds_add_brightness_v4(uint8_t i)
 {
     uint8_t *p = &brightness[i >> 2];
     uint8_t pos = i & 3;
@@ -66,7 +66,7 @@ static void add_brightness_v4(uint8_t i)
 }
 
 __attribute__((noinline, used))
-static void add_brightness_v3(uint8_t i)
+static void leds_add_brightness_v3(uint8_t i)
 {
     uint8_t shift = (i & 3) << 1;
     uint8_t *p = &brightness[i >> 2];
@@ -79,7 +79,7 @@ static void add_brightness_v3(uint8_t i)
 }
 
 __attribute__((noinline, used))
-static void add_brightness_v2(uint8_t i)
+static void leds_add_brightness_v2(uint8_t i)
 {
     uint8_t shift = (i & 3) << 1;
     uint8_t *p = &brightness[i >> 2];
@@ -89,9 +89,9 @@ static void add_brightness_v2(uint8_t i)
 }
 
 
-// void add_brightness(uint8_t i, uint8_t amount)
+// void leds_add_brightness(uint8_t i, uint8_t amount)
 __attribute__((noinline, used))
-static void add_brightness(uint8_t i)
+static void leds_add_brightness(uint8_t i)
 {
     uint8_t shift = (i & 3) << 1;
     // uint8_t mask = 3 << shift;

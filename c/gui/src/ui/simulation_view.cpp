@@ -23,36 +23,36 @@ namespace ledv::gui
 
         uint8_t brightness[64];
 
-        uint8_t get_brightness(uint8_t i)
+        uint8_t leds_get_brightness(uint8_t i)
         {
             return (brightness[i >> 2] >> ((i & 3) << 1)) & 3;
         }
 
 
 
-        uint8_t brightness_masks[4] = {
+        uint8_t leds_brightness_masks[4] = {
             0x03, 0x0C, 0x30, 0xC0
         };
 
-        uint8_t brightness_increments[4] = {
+        uint8_t leds_brightness_increments[4] = {
             0x01, 0x04, 0x10, 0x40
         };
 
 
         // Magic
-        void add_brightness_v4(uint8_t i)
+        void leds_add_brightness_v4(uint8_t i)
         {
             uint8_t *p = &brightness[i >> 2];
             uint8_t pos = i & 3;
 
-            uint8_t mask = brightness_masks[pos];
+            uint8_t mask = leds_brightness_masks[pos];
 
             if ((*p & mask) != mask)
-                *p += brightness_increments[pos];
+                *p += leds_brightness_increments[pos];
         }
 
-        // void add_brightness(uint8_t i, uint8_t amount)
-        void add_brightness(uint8_t i)
+        // void leds_add_brightness(uint8_t i, uint8_t amount)
+        void leds_add_brightness(uint8_t i)
         {
             uint8_t shift = (i & 3) << 1;
             // uint8_t mask = 3 << shift;
@@ -71,21 +71,21 @@ namespace ledv::gui
             }
         }
 
-        void process_particle(uint8_t x, uint8_t y)
+        void leds_add_particle(uint8_t x, uint8_t y)
         {
             uint8_t i = y * LEDS_X + x;
 
             // Set max brightness
             brightness[i >> 2] |= 3 << ((i & 3) << 1);
 
-            if (x > 0)  add_brightness_v4(i - 1);
-            if (x < 15) add_brightness_v4(i + 1);
-            if (y > 0)  add_brightness_v4(i - 16);
-            if (y < 15) add_brightness_v4(i + 16);
+            if (x > 0)  leds_add_brightness_v4(i - 1);
+            if (x < 15) leds_add_brightness_v4(i + 1);
+            if (y > 0)  leds_add_brightness_v4(i - 16);
+            if (y < 15) leds_add_brightness_v4(i + 16);
         }
 
 
-        void update_brightness(void)
+        void leds_update_brightness(void)
         {
             // Prevents infinite loop for the LED timer ISR.
             brightness[0] = 1u;
@@ -98,7 +98,7 @@ namespace ledv::gui
                 uint8_t led_x = p[i].x >> 4;
                 uint8_t led_y = p[i].y >> 4;
 
-                process_particle(led_x, led_y);
+                leds_add_particle(led_x, led_y);
             }
 
             // Remove sentinel contribution.
@@ -144,7 +144,7 @@ namespace ledv::gui
                 const uint8_t led_x = p[i].x >> 4;
                 const uint8_t led_y = p[i].y >> 4;
 
-                process_particle(led_x, led_y);
+                leds_add_particle(led_x, led_y);
 
                 const int idx = LEDS_X * led_y + led_x;
 
@@ -187,7 +187,7 @@ namespace ledv::gui
             // Count squares at each brightness level.
             for (int i = 0; i < LEDS_X * LEDS_Y; ++i)
             {
-                const int brightness_level = get_brightness(i);
+                const int brightness_level = leds_get_brightness(i);
 
                 if (brightness_level >= 0 && brightness_level <= 3)
                     brightness_counts[brightness_level]++;
@@ -220,7 +220,7 @@ namespace ledv::gui
 
                     const int idx = y * LEDS_X + x;
                     // int intensity_level = intensity_map[idx];
-                    int intensity_level = get_brightness(idx);
+                    int intensity_level = leds_get_brightness(idx);
 
                     ImU32 cell_color = intensity_level == 0
                         ? gui_cfg.GetBgColor(gui_cfg.bg_color_intensity)
