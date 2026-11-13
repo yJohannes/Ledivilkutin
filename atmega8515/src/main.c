@@ -376,7 +376,6 @@ static void ledivilkutin_initialize(void)
     // pd2_set_button_mode();
     init_led_pins(); // For debug
 
-
     init_button_interrupt();
     enable_button_interrupt();
 
@@ -388,11 +387,7 @@ static void ledivilkutin_initialize(void)
     set_led_on(0, 0);
     _delay_ms(500);
     set_led_off(0, 0);
-
-
-    set_led_on(1, 1);
     _delay_ms(500);
-    set_led_off(1, 1);
 
     // Wait for button press before starting I2C over pins PB5 & PB6
     wait_for_button_interrupt();
