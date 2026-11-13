@@ -167,111 +167,6 @@ void wait_for_button_interrupt(void)
     sei();
 }
 
-// ============================================================================
-// LED INTERRUPT
-// ============================================================================
-
-
-// 0 is a dummy value.
-static const uint8_t brightness_ocr[] = {
-    // 0, 64, 99, 199
-    0, 49, 84, 184
-};
-
-ISR(TIMER0_COMP_vect)
-{
-    uint8_t led = current_led;
-    uint8_t b;
-
-    for (;;) {
-        led++;                              // wraps 255 -> 0
-        uint8_t v = brightness[led >> 2];
-        if (v == 0) { led |= 3; continue; } // whole group of 4 is off, skip it
-        if (led & 2) v >>= 4;               // unsigned: no asr/ror loop
-        if (led & 1) v >>= 2;
-        b = v & 3;
-        if (b) break;
-    }
-    current_led = led;
-
-    uint8_t *z, *y;
-    uint8_t t0, t1;
-
-    asm volatile(
-        // Z = &row_tbl[led >> 4]
-        "mov  %A0, %4              \n\t"
-        "swap %A0                  \n\t"
-        "andi %A0, 0x0F            \n\t"
-        "ldi  %B0, 0               \n\t"
-        "subi %A0, lo8(-(%[rt]))   \n\t"
-        "sbci %B0, hi8(-(%[rt]))   \n\t"
-        // Y = &col_tbl[led & 15]
-        "mov  %A1, %4              \n\t"
-        "andi %A1, 0x0F            \n\t"
-        "ldi  %B1, 0               \n\t"
-        "subi %A1, lo8(-(%[ct]))   \n\t"
-        "sbci %B1, hi8(-(%[ct]))   \n\t"
-        // port writes
-        "ld   %2, Z                \n\t"
-        "ld   %3, Y                \n\t"
-        "or   %2, %3               \n\t"
-        "out  %[pa], %2            \n\t"
-        "in   %2, %[pb]            \n\t"
-        "andi %2, 0xE0             \n\t"   // keep PB7..PB5
-        "ldd  %3, Y+16             \n\t"
-        "or   %2, %3               \n\t"
-        "out  %[pb], %2            \n\t"
-        "ldd  %2, Z+16             \n\t"
-        "out  %[pc], %2            \n\t"
-        "ldd  %2, Y+32             \n\t"
-        "out  %[pd], %2            \n\t"
-        "ldd  %2, Z+32             \n\t"
-        "out  %[pe], %2            \n\t"
-        : "=&z"(z), "=&y"(y), "=&d"(t0), "=&d"(t1)
-        : "r"(led),
-          [rt] "i"(row_tbl), [ct] "i"(col_tbl),
-          [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
-          [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
-          [pe] "I"(_SFR_IO_ADDR(PORTE))
-        : "cc");
-
-    OCR0 = brightness_ocr[b];
-}
-
-
-// https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
-#define TIMER0_PRESCALER_BITS (1 << CS01) // Prescaler: 8
-#define TIMER0_CS_MASK ((1 << CS02) | (1 << CS01) | (1 << CS00))
-
-void init_led_timer(void)
-{
-    TCCR0 = 0;      // Stop timer while configuring it
-    TCNT0 = 0;      // Reset counter
-    OCR0 = 199;
-    TCCR0 = (1 << WGM01);   // CTC mode, timer stopped
-
-    TIMSK &= ~(1 << OCIE0);      // Disable compare-match interrupt
-}
-
-
-static void start_led_timer(void)
-{
-    TCNT0 = 0;             // Reset counter
-    TIFR = (1 << OCF0);    // Clear pending compare flag
-
-    TIMSK |= (1 << OCIE0);        // Enable compare interrupt
-
-    // Clear scaler bits and add new
-    TCCR0 = (TCCR0 & ~TIMER0_CS_MASK) | TIMER0_PRESCALER_BITS;
-}
-
-
-static void stop_led_timer(void)
-{
-    TIMSK &= ~(1 << OCIE0);     // Disable compare-match interrupt
-    TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
-}
-
 
 // ============================================================================
 // SIMULATION INTERRUPT
@@ -426,8 +321,8 @@ static void ledivilkutin_initialize(void)
     leds_update_brightness();
 
     // leds_init_pins();
-    init_led_timer();
-    start_led_timer();
+    leds_init_timer();
+    leds_start_timer();
     sei();
 
     running = true; // Remember to start simulation
@@ -435,7 +330,7 @@ static void ledivilkutin_initialize(void)
 
 static void ledivilkutin_sleep(void)
 {
-    stop_led_timer();
+    leds_stop_timer();
     stop_sim_timer();
 
     // Reset LED pins to inactive states.
@@ -469,7 +364,7 @@ static void ledivilkutin_sleep(void)
     // Set to prevent infinite loop in LED interrupt.
     leds_update_brightness();
 
-    start_led_timer();
+    leds_start_timer();
     start_sim_timer();
 }
 
@@ -579,7 +474,7 @@ int main()
             is_mpu6050_connected = true;
             simulation_init();
             leds_update_brightness();
-            start_led_timer();
+            leds_start_timer();
             start_sim_timer();
         }
         else
@@ -589,7 +484,7 @@ int main()
 
             if (!connected)
             {
-                stop_led_timer();
+                leds_stop_timer();
                 stop_sim_timer();
                 leds_set_all_off();
                 is_mpu6050_connected = false;

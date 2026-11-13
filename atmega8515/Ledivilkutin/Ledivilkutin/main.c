@@ -239,7 +239,7 @@ ISR(TIMER0_COMP_vect)
 #define TIMER0_PRESCALER_BITS (1 << CS01) // Prescaler: 8
 #define TIMER0_CS_MASK ((1 << CS02) | (1 << CS01) | (1 << CS00))
 
-void init_led_timer(void)
+void leds_init_timer(void)
 {
     TCCR0 = 0;      // Stop timer while configuring it
     TCNT0 = 0;      // Reset counter
@@ -250,7 +250,7 @@ void init_led_timer(void)
 }
 
 
-static void start_led_timer(void)
+static void leds_start_timer(void)
 {
     TCNT0 = 0;             // Reset counter
     TIFR = (1 << OCF0);    // Clear pending compare flag
@@ -262,7 +262,7 @@ static void start_led_timer(void)
 }
 
 
-static void stop_led_timer(void)
+static void leds_stop_timer(void)
 {
     TIMSK &= ~(1 << OCIE0);     // Disable compare-match interrupt
     TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
@@ -354,8 +354,8 @@ static void ledivilkutin_initialize(void)
     leds_update_brightness();
 
     leds_init_pins();
-    init_led_timer();
-    start_led_timer();
+    leds_init_timer();
+    leds_start_timer();
     sei();
 
     running = true; // Remember to start simulation
@@ -363,7 +363,7 @@ static void ledivilkutin_initialize(void)
 
 static void ledivilkutin_sleep(void)
 {
-    stop_led_timer();
+    leds_stop_timer();
     stop_sim_timer();
 
     simulation_init();
@@ -371,7 +371,7 @@ static void ledivilkutin_sleep(void)
     // Set to prevent infinite loop in LED interrupt.
     leds_update_brightness();
 
-    start_led_timer();
+    leds_start_timer();
     start_sim_timer();
 }
 
