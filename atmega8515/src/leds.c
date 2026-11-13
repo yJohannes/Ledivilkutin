@@ -155,6 +155,7 @@ void leds_update_brightness(void)
 
     for (uint8_t i = 0u; i < SIM_PARTICLE_COUNT; ++i)
     {
+        // Map [0, 255] -> [0, 15]
         uint8_t led_x = p[i].x >> 4;
         uint8_t led_y = p[i].y >> 4;
 
