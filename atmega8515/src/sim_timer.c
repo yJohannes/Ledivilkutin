@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "sim_config.h"
+
 
 /// @see https://ww1.microchip.com/downloads/en/DeviceDoc/doc2512.pdf#G1.1189378
 /// p. 93 Clock Select bits
@@ -46,7 +48,11 @@ void sim_timer_init(void)
     TCCR1A = 0;
     TCNT1 = 0;      // Reset counter
 
+#if (SIM_FPS == 19)
+    OCR1A = OCR1A_PS1024_19_HZ;
+#else
     OCR1A = OCR1A_PS1024_20_HZ;
+#endif
 
     TCCR1B = (1 << WGM12);      // CTC mode, timer stopped
     TIMSK &= ~(1 << OCIE1A);    // Disable compare interrupt
