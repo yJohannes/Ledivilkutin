@@ -27,7 +27,7 @@
 #define SIM_CELL_HEIGHT     16u  // SIM_HEIGHT / LEDS_Y
 
 // Constant as of now
-#define SIM_DEFAULT_PARTICLE_COUNT      75u
+#define SIM_DEFAULT_PARTICLE_COUNT      73u // 75 -> 73 because of the weirdest bug I've ever come across my whole entire day and ICBA to spend another indeterminate amount of time trying to hunt it down since it's 3 AM as I'm typing this proper length comment out to remember this devious, diabolical bug spawned by the devil himself where three (3) particles get stuck on y=0 and move freely on the x-axis and this didn't occur before I refactored code to modules and the three-state state machine so therefore I must conclude good programming practices are the root of all evil, not premature optimizations as someone in history might have said just like I'm saying something on line 30, now at column nr. 702, on sim_config.h at 3.17 AM on the 14th of November, 2026 while questioning my life choices and thinking what even is programming? End of sentence. Nobody will ever read this so maybe I should confess something extremely embarassing. Scrap that I will instead express my frustration for university programming courses. "Lines should be kept under 80 characters, do this... do that..." RAHH YOU CAN'T TELL ME WHAT TO DO I'M FREEEEEEEEEEEE UNLIKE YOUUUUUUUUUUUUUU THIS IS MY CODE I DO WHATEVER I FEEL LIKE DOING AND YOU CAN'T DO A_N_Y_T_H_I_N_G ABOUT IT >:]. THIS IS WHAT IT'S ALL ABOUT writing a 1300+ letter long comment. Good night.
 #define SIM_PARTICLE_COUNT              SIM_DEFAULT_PARTICLE_COUNT
 
 // Tweakable parameters
