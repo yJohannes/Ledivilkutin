@@ -51,14 +51,19 @@ namespace ledv::gui
                     // Scale to int8 and additionally scale to fit
                     // Flip x-coordinates for easier handling of the
                     // physical Arduino board.
-                    // Could possibly just bitshift for 2's complement?
-                    a.x = (int8_t)(-ax / 256) >> 3; // divide by 4 => [-32, 31]
-                    a.y = (int8_t)(-ay / 256)  >> 3;
+                    a.x = (int8_t)(-ax / 256); // divide by 4 => [-32, 31]
+                    a.y = (int8_t)(-ay / 256);
 
                     std::cout << std::format("a_raw:    [{:>6},{:>6}]", ax, ay)
                               << '\n'
                               << std::format("a_scaled: [{:>6},{:>6}]", a.x, a.y)
                               << '\n';
+
+                    a.x = 0;
+                    a.y = 0;
+
+                    a.x >>= 4;
+                    a.y >>= 4;
 
                     // Choose acceleration
                     // This is moved out of simulation_step for performance.
