@@ -58,13 +58,13 @@ uint8_t brightness[64];
 #endif // LEDS_DOUBLE_BUFFER
 
 
-uint8_t row_tbl[48] = {
+uint8_t leds_row_tbl[48] = {
     0x08,0x10,0x20,0x40,0x80, 0,0,0,0,0,0,0,0,0,0,0,                  // PORTA
     0,0,0,0,0,0,0,0, 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01,         // PORTC
     0,0,0,0,0, 0x01,0x02,0x04, 0,0,0,0,0,0,0,0                        // PORTE
 };
 
-uint8_t col_tbl[48] = {
+uint8_t leds_col_tbl[48] = {
     0x03,0x07,0x05,0x07,0x06,0x07,0x07,0x07,
     0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,                          // PORTA
     0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1E,0x1F,
@@ -115,7 +115,7 @@ ISR(TIMER0_COMP_vect)
     uint8_t *z, *y;
     uint8_t t0, t1;
 
-    asm volatile(
+    asm volatile (
         // Z = &row_tbl[led >> 4]
         "mov  %A0, %4              \n\t"
         "swap %A0                  \n\t"
@@ -147,7 +147,7 @@ ISR(TIMER0_COMP_vect)
         "out  %[pe], %2            \n\t"
         : "=&z"(z), "=&y"(y), "=&d"(t0), "=&d"(t1)
         : "r"(led),
-          [rt] "i"(row_tbl), [ct] "i"(col_tbl),
+          [rt] "i"(leds_row_tbl), [ct] "i"(leds_col_tbl),
           [pa] "I"(_SFR_IO_ADDR(PORTA)), [pb] "I"(_SFR_IO_ADDR(PORTB)),
           [pc] "I"(_SFR_IO_ADDR(PORTC)), [pd] "I"(_SFR_IO_ADDR(PORTD)),
           [pe] "I"(_SFR_IO_ADDR(PORTE))
@@ -165,7 +165,7 @@ void leds_init_pins(void)
 {
     // Set to prevent infinite loop in LED interrupt.
     // 32+2 because it blinks in the center unnoticeably.
-    brightness[32+2] = 1u;
+    // brightness[32+2] = 1u;
 
     // Set initial inactive output states:
     // Rows = LOW, cols = HIGH
@@ -197,6 +197,8 @@ void leds_init_timer(void)
 
 void leds_start_timer(void)
 {
+    current_led = 0;
+
     TCNT0 = 0;             // Reset counter
     TIFR = (1 << OCF0);    // Clear pending compare flag
 
@@ -211,6 +213,8 @@ void leds_stop_timer(void)
 {
     TIMSK &= ~(1 << OCIE0);     // Disable compare-match interrupt
     TCCR0 &= ~TIMER0_CS_MASK;   // Stop timer clock
+
+    current_led = 0;
 }
 
 
@@ -255,8 +259,8 @@ void leds_add_particle(uint8_t x, uint8_t y)
 
     if (x > 0)  leds_add_brightness(i - 1);
     if (x < 15) leds_add_brightness(i + 1);
-    if (y > 0)  leds_add_brightness(i - LEDS_Y);
-    if (y < 15) leds_add_brightness(i + LEDS_Y);
+    if (y > 0)  leds_add_brightness(i - LEDS_X);
+    if (y < 15) leds_add_brightness(i + LEDS_X);
 }
 
 #ifdef LEDS_DOUBLE_BUFFER
@@ -306,7 +310,7 @@ void leds_update_brightness(void)
 #endif // LEDS_DOUBLE_BUFFER
 
 
-#if ___________________
+#ifdef  _______________
 #define PIN_ROW_0   PA3
 #define PIN_ROW_1   PA4
 #define PIN_ROW_2   PA5
