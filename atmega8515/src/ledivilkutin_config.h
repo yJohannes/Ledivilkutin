@@ -11,4 +11,7 @@
 /* Uncomment to build without the MPU6050 / I2C. */
 // #define DISABLE_I2C
 
+/* Loop through all leds forever on leds_init_pins. */
+// #define LED_TEST
+
 #endif // LEDIVILKUTIN_CONFIG_H

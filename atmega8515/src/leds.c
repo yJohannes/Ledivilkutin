@@ -181,6 +181,22 @@ void leds_init_pins(void)
     DDRC |= LED_MASK_C;
     DDRD |= LED_MASK_D;
     DDRE |= LED_MASK_E;
+
+
+#ifdef LED_TEST
+    while (1)
+    {
+        for (uint8_t y = 0; y < 16; ++y)
+        {
+            for (uint8_t x = 0; x < 16; ++x)
+            {
+                leds_set_led_on(x, y);
+                _delay_ms(100);
+                leds_set_led_off(x, y);
+            }
+        }
+    }
+#endif
 }
 
 
