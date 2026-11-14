@@ -71,29 +71,27 @@ void sensor_update_acceleration(void)
     {
         sim_accel_timer = SIM_ACCELERATION_INTERVAL;
 
+        // Don't allow timers to disturb I2C
+        uint8_t old_sreg = SREG;
+        cli();
+
+        // SWAP X- AND Y-AXIS due to physical orientation
+        if (!mpu6050_read_accel_xy_i8(&a.y, &a.x))
         {
-            // Don't allow timers to disturb I2C
-            uint8_t old_sreg = SREG;
-            cli();
-
-            // SWAP X- AND Y-AXIS
-            if (!mpu6050_read_accel_xy_i8(&a.y, &a.x))
-            {
-                // On failure set acceleration to zero and if this was
-                // caused by MPU6050 disconnecting the code above will
-                // handle it.
-                a.x = 0;
-                a.y = 0;
-            }
-
-            SREG = old_sreg;
+            // On failure set acceleration to zero and if this was
+            // caused by MPU6050 disconnecting the code above will
+            // handle it.
+            a.x = 0;
+            a.y = 0;
         }
+
+        SREG = old_sreg;
 
         a.x >>= ACCELERATION_SHIFT;
         a.y >>= ACCELERATION_SHIFT;
 
+        // Flip x-axis due to physical orientation
         a.x = -a.x;
-        // a.y = -a.y;
     }
     else
     {
