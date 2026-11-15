@@ -1,3 +1,10 @@
+/**
+ * @file i2c_avr.c
+ * @author Johannes Ylinen
+ * @brief SDA and SCL pin configuration and manipulation for AVR.
+ * @date 2026-11-15
+ */
+
 #ifdef I2C_PLATFORM_AVR
 
 #include "i2c.h"

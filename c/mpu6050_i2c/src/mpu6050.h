@@ -1,8 +1,12 @@
-/// @file mpu6050.h
-/// @author Johannes Ylinen
-/// @brief Real awesome stuff for MPU6050.
-/// @see https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf
-
+/**
+ * @file mpu6050.c
+ * @author Johannes Ylinen
+ * @brief MPU6050 accelerometer driver with initialization, power management,
+ *        device identification and acceleration data reading.
+ * @date 2026-10-22
+ *
+ * @see https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf
+ */
 
 #ifndef MPU6050_H
 #define MPU6050_H
@@ -16,8 +20,7 @@ extern "C" {
 #endif
 
 
-/// @brief Wakes MPU6050 up and sets it to Accelerometer
-// XY only & Low Power Mode
+/// @brief Wakes MPU6050 up and sets only x- and y-accelerometer on.
 bool mpu6050_init(void);
 bool mpu6050_is_connected(void);
 bool mpu6050_check_identity(void);

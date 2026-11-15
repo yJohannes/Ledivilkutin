@@ -1,8 +1,11 @@
-/// @file i2c.h
-/// @author Johannes Ylinen
-/// @brief A very elementary I2C implementation for a MCU + MPU6050.
-///
-/// @see https://www.nxp.com/docs/en/user-guide/UM10204.pdf
+/**
+ * @file i2c.h
+ * @author Johannes Ylinen
+ * @brief A very simple I2C implementation for ATmega8515L + MPU6050
+ * @date 2026-10-22
+ *
+ * @see https://www.nxp.com/docs/en/user-guide/UM10204.pdf
+ */
 
 #ifndef I2C_H
 #define I2C_H

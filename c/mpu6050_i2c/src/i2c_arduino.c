@@ -1,3 +1,11 @@
+/**
+ * @file i2c_arduino.c
+ * @author Johannes Ylinen
+ * @brief SDA and SCL pin configuration and manipulation for Arduino.
+ * @date 2026-11-15
+ */
+
+
 #ifdef I2C_PLATFORM_ARDUINO
 
 

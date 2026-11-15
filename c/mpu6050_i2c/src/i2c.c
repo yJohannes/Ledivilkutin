@@ -1,3 +1,12 @@
+/**
+ * @file i2c.h
+ * @author Johannes Ylinen
+ * @brief A simple I2C implementation for ATmega8515L + MPU6050
+ * @date 2026-10-22
+ *
+ * @see https://www.nxp.com/docs/en/user-guide/UM10204.pdf
+ */
+
 #include "i2c.h"
 
 #include <stdint.h>
@@ -16,6 +25,10 @@
     #error "No supported I2C backend selected"
 #endif
 
+
+/* ====================================================================
+ * Helpers
+ * ==================================================================== */
 
 /// @brief Reads the ACK bit sent by slave.
 static bool i2c_read_ack(void)
@@ -52,19 +65,6 @@ static void i2c_write_ack(bool ack)
     // Pull clock back down
     i2c_scl_low();
     i2c_sda_release();
-}
-
-
-void i2c_release_pins(void)
-{
-    i2c_scl_release();
-    i2c_sda_release();
-}
-
-
-void i2c_init(void)
-{
-    i2c_release_pins();
 }
 
 
@@ -171,6 +171,35 @@ static void i2c_read_byte(uint8_t* out_data, bool ack)
 }
 
 
+/* ====================================================================
+ * Public API
+ * ==================================================================== */
+
+void i2c_release_pins(void)
+{
+    i2c_scl_release();
+    i2c_sda_release();
+}
+
+
+void i2c_init(void)
+{
+    i2c_release_pins();
+}
+
+
+bool i2c_check_ack(uint8_t addr)
+{
+    i2c_start();
+
+    bool ack = i2c_write_address_rw(addr, I2C_WRITE);
+
+    i2c_stop();
+
+    return ack;
+}
+
+
 bool i2c_write_register(
     uint8_t addr,
     uint8_t reg,
@@ -269,16 +298,4 @@ bool i2c_read_registers(
 fail:
     i2c_stop();
     return false;
-}
-
-
-bool i2c_check_ack(uint8_t addr)
-{
-    i2c_start();
-
-    bool ack = i2c_write_address_rw(addr, I2C_WRITE);
-
-    i2c_stop();
-
-    return ack;
 }

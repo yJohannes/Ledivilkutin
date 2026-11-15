@@ -1,3 +1,9 @@
+/**
+ * @file mpu6050.c
+ * @author Johannes Ylinen
+ * @date 2026-10-22
+ */
+
 #include "mpu6050.h"
 
 #include <stdbool.h>
@@ -6,21 +12,6 @@
 
 #include "mpu6050_regs.h"
 #include "i2c.h"
-
-
-bool mpu6050_check_identity(void)
-{
-    uint8_t id;
-
-    if (!i2c_read_register(
-            MPU6050_ADDR,
-            MPU6050_REG_WHO_AM_I,
-            &id))
-        return false;
-
-    return id == MPU6050_WHO_AM_I
-        || id == MPU6050_WHO_AM_I_CLONE;
-}
 
 
 /// @brief Configure MPU6050 for accelerometer XY-only operation.
@@ -69,6 +60,25 @@ static bool mpu6050_set_accel_xy_only(void)
         return false;
 
     return true;
+}
+
+
+/* ====================================================================
+ * Public API
+ * ==================================================================== */
+
+bool mpu6050_check_identity(void)
+{
+    uint8_t id;
+
+    if (!i2c_read_register(
+            MPU6050_ADDR,
+            MPU6050_REG_WHO_AM_I,
+            &id))
+        return false;
+
+    return id == MPU6050_WHO_AM_I
+        || id == MPU6050_WHO_AM_I_CLONE;
 }
 
 
