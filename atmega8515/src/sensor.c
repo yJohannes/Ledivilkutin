@@ -75,8 +75,8 @@ void sensor_update_acceleration(void)
         uint8_t old_sreg = SREG;
         cli();
 
-        // SWAP X- AND Y-AXIS due to physical orientation
-        if (!mpu6050_read_accel_xy_i8(&a.y, &a.x))
+        int8_t a_x, a_y;
+        if (!mpu6050_read_accel_xy_i8(&a_x, &a_y))
         {
             // On failure set acceleration to zero and if this was
             // caused by MPU6050 disconnecting the code above will
@@ -84,14 +84,14 @@ void sensor_update_acceleration(void)
             a.x = 0;
             a.y = 0;
         }
+        else
+        {
+            // Apply transform due to physical orientation
+            a.x =  a_y >> ACCELERATION_SHIFT;
+            a.y = -a_x >> ACCELERATION_SHIFT;
+        }
 
         SREG = old_sreg;
-
-        a.x >>= ACCELERATION_SHIFT;
-        a.y >>= ACCELERATION_SHIFT;
-
-        // Flip x-axis due to physical orientation
-        a.x = -a.x;
     }
     else
     {
