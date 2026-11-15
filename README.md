@@ -9,9 +9,9 @@ Hi
 
 ```
 cd arduino
-sync_lib
+install_lib
 ```
-- `arduino/sync_lib.bat` installs the `mpu6050_i2c` library for the Arduino IDE.
+- `arduino/install_lib.bat` installs the `mpu6050_i2c` library for the Arduino IDE.
 
 ### C
 - Install AVR-GCC
