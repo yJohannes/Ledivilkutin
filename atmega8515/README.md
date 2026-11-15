@@ -1,4 +1,17 @@
+# Requirements
+- avr-gcc
+
+# Building firmware
+```
+cd atmega8515
+build
+```
+
 # Uploading firmware to ATmega8515
+
+```
+cd build\atmega8515
+```
 
 ## Check device connection
 

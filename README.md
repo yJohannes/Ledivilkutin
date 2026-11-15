@@ -2,34 +2,29 @@
 
 Hi
 
-
-## Setup
-
-### Arduino
-
-```
-cd arduino
-install_lib
-```
-- `arduino/install_lib.bat` installs the `mpu6050_i2c` library for the Arduino IDE.
-
-### C
-- Install AVR-GCC
-- CMake configure & build
-
-```
-cd c
-run gui
-```
-
-### Python
-- See python/README
-
+TODO
 
 Some related math and notes can be found in `notes`.
 
 
-## Logs
+## Arduino
+See `arduino/README.md`
+
+## ATmega8515
+See `atmega8515/README.md`
+
+## C
+See `c/README.md`
+
+## Python
+See `python/README.md`
+
+
+## Project timeline
+16/11/2026
+- Project is finished.
+
+TODO: fill this gap in the timeline and
 
 4/11/2026
 - I'm going to sleep now
@@ -119,12 +114,13 @@ pre
 ## Programming the microcontroller checklist
 
 ### Before programming
-- Clone **DEV** branch of this repository.
+- Clone **dev** branch of this repository.
 - Set the macro for the correct platform for i2c.
 - Compile with -O2 not -Os.
 
 ### After programming
-- DONT PRESS THE BUTTON, USE RESISTOR.
+- Disconnect programer
+- After initial button press only ever use a resistor to press.
 - Wire VCC, GND, AD0->GND, SDA->PB5 and SCL->PB6.
 - Ask for an additional piece of two-sided tape for the accelerometer.
 
