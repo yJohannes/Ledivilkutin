@@ -1,7 +1,7 @@
 /**
  * @file sensor.h
  * @author Johannes Ylinen
- * @brief MPU6050 controls.
+ * @brief MPU6050 controls. If DISABLE_I2C is defined, stubs are used.
  * @date 2026-11-14
  */
 

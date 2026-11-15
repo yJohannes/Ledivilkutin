@@ -22,9 +22,15 @@
 #include "i2c.h"
 #include "mpu6050.h"
 
-/// @brief Maps acceleration to range, e.g. 3 -> [-16, 15]
-#define ACCELERATION_SHIFT 3
+/// @brief Maps acceleration to a range.
+///        3 -> [-32, 31]
+///        4 -> [-16, 15]
+#define ACCELERATION_SHIFT 4
 
+
+/* ====================================================================
+ * Public API
+ * ==================================================================== */
 
 bool sensor_connect(void)
 {
